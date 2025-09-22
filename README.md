@@ -1,2 +1,1 @@
-paz1c project
-denchik lox
+paz1c project sanya lox
