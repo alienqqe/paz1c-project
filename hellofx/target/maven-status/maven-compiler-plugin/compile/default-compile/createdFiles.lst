@@ -1,4 +1,9 @@
+org\openjfx\hellofx\entities\TrainingSession.class
+org\openjfx\hellofx\entities\Coach.class
+org\openjfx\hellofx\entities\Membership.class
 module-info.class
 org\openjfx\hellofx\App.class
 org\openjfx\hellofx\PrimaryController.class
+org\openjfx\hellofx\entities\Membership$MembershipType.class
+org\openjfx\hellofx\entities\Client.class
 org\openjfx\hellofx\SecondaryController.class
