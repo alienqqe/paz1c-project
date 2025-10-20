@@ -6,3 +6,6 @@ C:\paz1c-project\hellofx\src\main\java\org\openjfx\hellofx\App.java
 C:\paz1c-project\hellofx\src\main\java\module-info.java
 C:\paz1c-project\hellofx\src\main\java\org\openjfx\hellofx\entities\Membership.java
 C:\paz1c-project\hellofx\src\main\java\org\openjfx\hellofx\SecondaryController.java
+C:\paz1c-project\hellofx\src\main\java\org\openjfx\hellofx\controllers\AssignMembershipController.java
+C:\paz1c-project\hellofx\src\main\java\org\openjfx\hellofx\utils\Database.java
+C:\paz1c-project\hellofx\src\main\java\org\openjfx\hellofx\controllers\MembershipController.java
