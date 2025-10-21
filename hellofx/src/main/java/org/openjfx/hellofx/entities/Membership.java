@@ -7,6 +7,6 @@ import java.time.LocalDate;
 public record Membership(Long id, LocalDate startDate, LocalDate expiresAt, double price, MembershipType Type, Long idOfHolder ){
 
     public enum MembershipType{
-        Monthly, Yearly, Weekly, 10
+        Monthly, Yearly, Weekly, Ten
     }
 }
