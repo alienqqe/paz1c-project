@@ -10,8 +10,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.openjfx.hellofx.App;
+import org.openjfx.hellofx.dao.ClientDAO;
+import org.openjfx.hellofx.entities.Client;
+import org.openjfx.hellofx.utils.Database;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,17 +40,43 @@ public class MembershipController {
     @FXML
     private Label searchStatus;
 
-    // Fake data for demonstration
-    private final List<String> allClients = List.of(
-            "John Doe",
-            "Jane Smith",
-            "Michael Johnson",
-            "Anna Brown"
-    );
+    private final ClientDAO clientDAO = new ClientDAO();
+
+
+    private List<String> searchClientsInDatabase(String query) {
+        List<String> clients = new ArrayList<>();
+
+        String sql = """
+            SELECT name, email FROM clients
+            WHERE LOWER(name) LIKE ? OR LOWER(email) LIKE ?
+        """;
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            String pattern = "%" + query + "%";
+            stmt.setString(1, pattern);
+            stmt.setString(2, pattern);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String email = rs.getString("email");
+                    clients.add(name + " (" + email + ")");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error fetching clients: " + e.getMessage());
+        }
+
+        return clients;
+    }
 
     @FXML
     void onSearchButton(ActionEvent event) {
-        String query = searchField.getText().trim().toLowerCase();
+        String query = searchField.getText().trim();
         resultsList.getItems().clear();
 
         if (query.isEmpty()) {
@@ -52,33 +85,32 @@ public class MembershipController {
             return;
         }
 
-        // Fake "search"
-        List<String> found = new ArrayList<>();
-        for (String client : allClients) {
-            if (client.toLowerCase().contains(query)) {
-                found.add(client);
-            }
-        }
+        try {
+            List<Client> found = clientDAO.searchClients(query);
 
-        if (found.isEmpty()) {
-            searchStatus.setText("No users found.");
-            resultsBox.setVisible(false);
-        } else {
-            searchStatus.setText("Found " + found.size() + " user(s):");
-            resultsBox.setVisible(true);
-
-            for (String name : found) {
-                HBox row = createClientRow(name);
-                resultsList.getItems().add(row);
+            if (found.isEmpty()) {
+                searchStatus.setText("No users found.");
+                resultsBox.setVisible(false);
+            } else {
+                searchStatus.setText("Found " + found.size() + " user(s):");
+                resultsBox.setVisible(true);
+                for (Client c : found) {
+                    HBox row = createClientRow(c);
+                    resultsList.getItems().add(row);
+                }
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showError("Error fetching clients: " + e.getMessage());
         }
     }
 
     // Creates one row in the results list: "Client Name  [Assign Button]"
-    private HBox createClientRow(String clientName) {
-        Label nameLabel = new Label(clientName);
+      private HBox createClientRow(Client client) {
+        Label nameLabel = new Label(client.email() + " (" + client.phoneNumber() + ")");
         Button assignButton = new Button("Assign");
-        assignButton.setOnAction(e -> openAssignMembershipWindow(clientName));
+        assignButton.setOnAction(e -> openAssignMembershipWindow(client.name()));
 
         HBox row = new HBox(10);
         row.getChildren().addAll(nameLabel, assignButton);
