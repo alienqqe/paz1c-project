@@ -1,7 +1,7 @@
 package org.openjfx.hellofx.controllers;
 
 import java.sql.*;
-import java.time.LocalDate;
+
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -34,7 +34,7 @@ public class RegisterController {
             return;
         }
 
-        Client client = new Client(null, name, false, false, email, phone, new LocalDate[0]);
+        Client client = new Client(null, name, false, false, email, phone);
         
         try {
             clientDAO.addClient(client);

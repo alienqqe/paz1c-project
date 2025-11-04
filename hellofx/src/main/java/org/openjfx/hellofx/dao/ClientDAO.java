@@ -4,7 +4,6 @@ import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.utils.Database;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +43,7 @@ public class ClientDAO {
                         rs.getBoolean("is_active_member"),
                         rs.getBoolean("is_in_gym"),
                         rs.getString("email"),
-                        rs.getString("phone_number"),
-                        new LocalDate[0]
+                        rs.getString("phone_number")
                     ));
                 }
             }

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 
 
-public record Membership(Long id, LocalDate startDate, LocalDate expiresAt, double price, MembershipType Type, Long idOfHolder ){
+public record Membership(Long id, LocalDate startDate, LocalDate expiresAt, double price, MembershipType type, Long idOfHolder ){
 
     public enum MembershipType{
         Monthly, Yearly, Weekly, Ten
