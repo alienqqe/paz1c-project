@@ -34,7 +34,7 @@ public class RegisterController {
             return;
         }
 
-        Client client = new Client(null, name, false, false, email, phone);
+        Client client = new Client(null, name, email, phone);
         
         try {
             clientDAO.addClient(client);

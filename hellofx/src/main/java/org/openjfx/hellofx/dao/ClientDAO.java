@@ -18,8 +18,6 @@ public class ClientDAO {
             stmt.setString(1, client.name());
             stmt.setString(2, client.email());
             stmt.setString(3, client.phoneNumber());
-            stmt.setBoolean(4, client.isActiveMember());
-            stmt.setBoolean(5, client.isInTheGym());
             stmt.executeUpdate();
         }
     }
@@ -40,8 +38,6 @@ public class ClientDAO {
                     results.add(new Client(
                         rs.getLong("id"),
                         rs.getString("name"),
-                        rs.getBoolean("is_active_member"),
-                        rs.getBoolean("is_in_gym"),
                         rs.getString("email"),
                         rs.getString("phone_number")
                     ));
