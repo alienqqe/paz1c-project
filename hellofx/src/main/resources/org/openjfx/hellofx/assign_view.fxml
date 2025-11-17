@@ -80,12 +80,12 @@
       </GridPane>
       <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0">
          <children>
-            <Button fx:id="confirmButton" mnemonicParsing="false" text="Confirm">
+            <Button fx:id="confirmButton" mnemonicParsing="false" onAction="#onConfirm" text="Confirm">
                <HBox.margin>
                   <Insets right="10.0" top="20.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="cancelButton" mnemonicParsing="false" text="Cancel">
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#onCancel" text="Cancel">
                <HBox.margin>
                   <Insets top="20.0" />
                </HBox.margin>
