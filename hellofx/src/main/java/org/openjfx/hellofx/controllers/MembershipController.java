@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 import org.openjfx.hellofx.App;
 import org.openjfx.hellofx.dao.ClientDAO;
 import org.openjfx.hellofx.dao.MembershipDAO;
+import org.openjfx.hellofx.dao.VisitDAO;
 import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.utils.Database;
 
@@ -44,38 +45,16 @@ public class MembershipController {
 
     private final ClientDAO clientDAO = new ClientDAO();
     private final MembershipDAO membershipDAO = new MembershipDAO();
+    private final VisitDAO visitDAO = new VisitDAO();
+    
 
-
-    private List<String> searchClientsInDatabase(String query) {
-        List<String> clients = new ArrayList<>();
-
-        String sql = """
-            SELECT name, email FROM clients
-            WHERE LOWER(name) LIKE ? OR LOWER(email) LIKE ?
-        """;
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            String pattern = "%" + query + "%";
-            stmt.setString(1, pattern);
-            stmt.setString(2, pattern);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    String name = rs.getString("name");
-                    String email = rs.getString("email");
-                    clients.add(name + " (" + email + ")");
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showError("Error fetching clients: " + e.getMessage());
-        }
-
-        return clients;
+    private void showAlert(Alert.AlertType type, String message) {
+        Alert alert = new Alert(type);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
+
+
 
     @FXML
     void onSearchButton(ActionEvent event) {
@@ -142,9 +121,9 @@ public class MembershipController {
         
         
                 
-                HBox row = new HBox(10);
-                Button deleteBtn = new Button("Delete");
-                deleteBtn.setDisable("none".equalsIgnoreCase(membershipLabelText));
+        
+        Button deleteBtn = new Button("Delete");
+        deleteBtn.setDisable("none".equalsIgnoreCase(membershipLabelText));
                 
         deleteBtn.setOnAction(e -> {
             boolean confirmed = confirmDelete(
@@ -162,10 +141,24 @@ public class MembershipController {
                     }
                 }
             }); 
+             Button checkInButton = new Button("Check In");
+    checkInButton.setOnAction(e -> {
+        try {
+            boolean checkedIn = visitDAO.checkInClient(client.id());
+            if (checkedIn) {
+                showAlert(Alert.AlertType.INFORMATION, "Check-in successful!");
+            } else {
+                showAlert(Alert.AlertType.WARNING, "No valid membership found or already checked in.");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Check-in failed: " + ex.getMessage());
+        }
+    });
                     
-                    
-                    row.getChildren().addAll(nameLabel, assignButton , deleteBtn);
-                    return row;
+      HBox row = new HBox(10);
+      row.getChildren().addAll(nameLabel, assignButton , deleteBtn, checkInButton);
+      return row;
     }
     @FXML
     void onRegisterNewClient(ActionEvent event) {
@@ -188,7 +181,6 @@ public class MembershipController {
 
 
 
-    // Opens the assign_membership.fxml in a new window
     private void openAssignMembershipWindow(Client client) {
         try {
             FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/assign_view.fxml"));

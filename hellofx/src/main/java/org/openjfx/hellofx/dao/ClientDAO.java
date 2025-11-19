@@ -10,7 +10,7 @@ import java.util.List;
 public class ClientDAO {
 
     public void addClient(Client client) throws SQLException {
-        String sql = "INSERT INTO clients (name, email, phone_number, is_active_member, is_in_gym) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO clients (name, email, phone_number) VALUES (?, ?, ?)";
 
         try (Connection conn = Database.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
