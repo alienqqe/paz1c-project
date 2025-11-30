@@ -61,10 +61,33 @@
             <ListView fx:id="resultsList" />
          </children>
       </VBox>
-      <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegisterNewClient" text="Register new client">
+      <HBox alignment="CENTER">
+         <children>
+            <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegisterNewClient" text="Register new client" />
+            <Button fx:id="registerCoachButton" mnemonicParsing="false" onAction="#onRegisterNewCoach" text="Register new coach">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="searchCoachButton" mnemonicParsing="false" onAction="#onSearchCoach" text="Search coaches">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="weeklyScheduleButton" mnemonicParsing="false" onAction="#onOpenWeeklySchedule" text="Weekly timetable">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="bookSessionButton" mnemonicParsing="false" onAction="#onBookTrainingSession" text="Book training session">
+               <HBox.margin>
+                  <Insets left="10.0" />
+               </HBox.margin>
+            </Button>
+         </children>
          <VBox.margin>
             <Insets top="100.0" />
          </VBox.margin>
-      </Button>
+      </HBox>
    </children>
 </VBox>

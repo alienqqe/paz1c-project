@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.openjfx.hellofx.controllers.TrainingSessionBookingController"
+      spacing="10" alignment="CENTER">
+    <padding>
+        <Insets top="15" right="15" bottom="15" left="15"/>
+    </padding>
+
+    <Label text="Book Training Session" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+    <GridPane hgap="10" vgap="10">
+        <columnConstraints>
+            <ColumnConstraints halignment="RIGHT"/>
+            <ColumnConstraints halignment="LEFT"/>
+        </columnConstraints>
+
+        <children>
+            <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="titleField" promptText="Session title" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+            <Label text="Client name:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="clientNameField" promptText="Client full name" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+            <Label text="Coach name:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="coachNameField" promptText="Coach full name" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+            <Label text="Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <DatePicker fx:id="datePicker" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+            <Label text="Start (HH:mm):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+            <TextField fx:id="startField" promptText="09:00" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+            <Label text="End (HH:mm):" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+            <TextField fx:id="endField" promptText="10:00" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        </children>
+    </GridPane>
+
+    <HBox spacing="10">
+        <Button fx:id="saveButton" text="Book Session" onAction="#onSave"/>
+        <Button text="Close" onAction="#onClose"/>
+    </HBox>
+</VBox>
