@@ -62,4 +62,24 @@ CREATE TABLE visits (
     FOREIGN KEY (membership_id) REFERENCES memberships(id) ON DELETE CASCADE
 );
 
+-- Basic users table for authentication/authorization
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role ENUM('ADMIN', 'STAFF', 'COACH') NOT NULL DEFAULT 'STAFF',
+    coach_id BIGINT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (coach_id) REFERENCES coaches(id) ON DELETE SET NULL
+);
+
+CREATE TABLE coach_availability (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coach_id BIGINT NOT NULL,
+    startDate DATETIME NOT NULL,
+    endDate DATETIME NOT NULL,
+    note VARCHAR(200),
+    FOREIGN KEY (coach_id) REFERENCES coaches(id) ON DELETE CASCADE
+);
+
 

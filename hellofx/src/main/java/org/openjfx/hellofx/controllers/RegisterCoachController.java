@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import org.openjfx.hellofx.dao.CoachDAO;
 import org.openjfx.hellofx.entities.Coach;
+import org.openjfx.hellofx.utils.AuthService;
 
 public class RegisterCoachController {
 
@@ -18,6 +19,7 @@ public class RegisterCoachController {
     @FXML private Label statusLabel;
 
     private final CoachDAO coachDAO = new CoachDAO();
+    private final AuthService authService = new AuthService();
 
     @FXML
     void onRegisterButton(ActionEvent event) {
@@ -34,8 +36,19 @@ public class RegisterCoachController {
         Coach coach = new Coach(null, name, emailValue, phone, null, null);
 
         try {
-            coachDAO.addCoach(coach);
-            showAlert(Alert.AlertType.INFORMATION, "Coach registered successfully!");
+            Long coachId = coachDAO.addCoach(coach);
+
+            String username = (emailValue != null && !emailValue.isBlank())
+                ? emailValue
+                : "coach" + coachId;
+            String initialPassword = phone; // initial password set to phone; coach should change it later
+
+            if (coachId != null) {
+                authService.createUser(username, initialPassword, "COACH", coachId);
+            }
+
+            showAlert(Alert.AlertType.INFORMATION,
+                "Coach registered. Login with username: " + username + " and initial password: " + initialPassword);
             clearFields();
         } catch (SQLException e) {
             e.printStackTrace();

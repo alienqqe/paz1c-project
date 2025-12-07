@@ -11,7 +11,7 @@ import javafx.scene.control.TextField;
 
 import org.openjfx.hellofx.dao.ClientDAO;
 import org.openjfx.hellofx.entities.Client;
-import org.openjfx.hellofx.utils.Database;
+
 
 public class RegisterController {
 

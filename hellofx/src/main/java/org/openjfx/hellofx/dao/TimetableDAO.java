@@ -22,12 +22,23 @@ public class TimetableDAO {
                    cl.name AS client_name,
                    ts.startDate,
                    ts.endDate,
-                   ts.title
+                   ts.title,
+                   0 AS is_availability
             FROM training_sessions ts
             JOIN coaches c ON c.id = ts.coach_id
             JOIN clients cl ON cl.id = ts.client_id
             WHERE ts.startDate >= ? AND ts.startDate < ?
-            ORDER BY c.name, ts.startDate
+            UNION ALL
+             SELECT c.name AS coach_name,
+                   'Available' AS client_name,
+                   ca.startDate,
+                   ca.endDate,
+                   COALESCE(ca.note, 'Available'),
+                   1 AS is_availability
+            FROM coach_availability ca
+            JOIN coaches c ON c.id = ca.coach_id
+            WHERE ca.startDate >= ? AND ca.startDate < ?
+            ORDER BY coach_name, startDate
                 """;
 
             List<WeeklySession> results = new ArrayList<>();
@@ -37,6 +48,8 @@ public class TimetableDAO {
 
                 stmt.setTimestamp(1, Timestamp.valueOf(weekStart.atStartOfDay()));
                 stmt.setTimestamp(2, Timestamp.valueOf(weekEnd.atStartOfDay()));
+                stmt.setTimestamp(3, Timestamp.valueOf(weekStart.atStartOfDay()));
+                stmt.setTimestamp(4, Timestamp.valueOf(weekEnd.atStartOfDay()));
 
                 try (ResultSet rs = stmt.executeQuery()) {
                     while (rs.next()) {

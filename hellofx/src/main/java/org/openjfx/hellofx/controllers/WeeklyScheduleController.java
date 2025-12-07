@@ -3,7 +3,7 @@ package org.openjfx.hellofx.controllers;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
+
 
 import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.model.WeeklySession;
@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+
 
 public class WeeklyScheduleController {
     @FXML private TableView<WeeklySession> table;

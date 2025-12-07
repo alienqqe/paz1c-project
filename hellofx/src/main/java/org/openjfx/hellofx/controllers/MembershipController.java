@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.text.Text;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -14,6 +15,8 @@ import org.openjfx.hellofx.dao.ClientDAO;
 import org.openjfx.hellofx.dao.MembershipDAO;
 import org.openjfx.hellofx.dao.VisitDAO;
 import org.openjfx.hellofx.entities.Client;
+import org.openjfx.hellofx.utils.AuthContext;
+import org.openjfx.hellofx.utils.AuthService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,11 +38,85 @@ public class MembershipController {
     private TextField searchField;
 
     @FXML
+    private Button manageUsersButton;
+
+    @FXML
+    private Button availabilityButton;
+
+    @FXML
+    private Button weeklyScheduleButton;
+
+    @FXML
+    private Button logoutButton;
+
+    @FXML
+    private HBox searchContainer;
+
+    @FXML
+    private HBox actionsRow1;
+
+    @FXML
+    private HBox actionsRow2;
+
+    @FXML
     private Label searchStatus;
 
+    @FXML
+    private Text titleText;
+
+    private final AuthService authService = new AuthService();
     private final ClientDAO clientDAO = new ClientDAO();
     private final MembershipDAO membershipDAO = new MembershipDAO();
     private final VisitDAO visitDAO = new VisitDAO();
+
+    @FXML
+    public void initialize() {
+        if (manageUsersButton != null) {
+            manageUsersButton.setDisable(!AuthContext.isAdmin());
+            manageUsersButton.setVisible(AuthContext.isAdmin());
+        }
+
+        boolean isCoach = AuthContext.isCoach();
+        if (availabilityButton != null) {
+            availabilityButton.setDisable(!isCoach);
+            availabilityButton.setVisible(isCoach);
+        }
+        if (titleText != null && isCoach) {
+            titleText.setText("Coach dashboard");
+        }
+
+        if (isCoach) {
+            // hide membership-related UI
+            if (searchContainer != null) { searchContainer.setVisible(false); searchContainer.setManaged(false); }
+            if (resultsBox != null) { resultsBox.setVisible(false); resultsBox.setManaged(false); }
+            if (searchStatus != null) { searchStatus.setVisible(false); searchStatus.setManaged(false); }
+
+            if (actionsRow1 != null) {
+                actionsRow1.getChildren().forEach(node -> {
+                    if (node == weeklyScheduleButton) {
+                        node.setVisible(true);
+                        node.setDisable(false);
+                        node.setManaged(true);
+                    } else {
+                        node.setVisible(false);
+                        node.setManaged(false);
+                    }
+                });
+            }
+            if (actionsRow2 != null) {
+                actionsRow2.getChildren().forEach(node -> {
+                    if (node == availabilityButton || node == logoutButton) {
+                        node.setVisible(true);
+                        node.setDisable(false);
+                        node.setManaged(true);
+                    } else {
+                        node.setVisible(false);
+                        node.setManaged(false);
+                    }
+                });
+            }
+        }
+    }
 
     private void showAlert(Alert.AlertType type, String message) {
         Alert alert = new Alert(type);
@@ -106,13 +183,19 @@ public class MembershipController {
             ex.printStackTrace();
         }
 
+        boolean isAdmin = AuthContext.isAdmin();
         Label nameLabel = new Label(client.email() + " (" + client.name() + ") - Membership: " + membershipLabelText);
         Button assignButton = new Button("Assign");
         assignButton.setOnAction(e -> openAssignMembershipWindow(client));
 
         Button deleteBtn = new Button("Delete");
-        deleteBtn.setDisable("none".equalsIgnoreCase(membershipLabelText));
+        deleteBtn.setDisable(!isAdmin || "none".equalsIgnoreCase(membershipLabelText));
         deleteBtn.setOnAction(e -> {
+            if (!AuthContext.isAdmin()) {
+                showAlert(Alert.AlertType.WARNING, "Only admins can delete memberships.");
+                return;
+            }
+
             boolean confirmed = confirmDelete(
                 "Delete Membership",
                 "Are you sure you want to delete membership for " + client.name() + "?"
@@ -236,6 +319,61 @@ public class MembershipController {
         } catch (IOException e) {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Failed to open booking window: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onManageUsers(ActionEvent event) {
+        if (!AuthContext.isAdmin()) {
+            showAlert(Alert.AlertType.WARNING, "Only admins can manage users.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/user_management.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("User Management");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to open user management: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onAddAvailability(ActionEvent event) {
+        if (!AuthContext.isCoach()) {
+            showAlert(Alert.AlertType.WARNING, "Only coaches can add availability.");
+            return;
+        }
+        if (AuthContext.getCurrentUser() == null || AuthContext.getCurrentUser().coachId() == null) {
+            showAlert(Alert.AlertType.ERROR, "Your account is not linked to a coach profile.");
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/add_availability.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Add Availability");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to open availability window: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    void onLogout(ActionEvent event) {
+        authService.logout();
+        try {
+            App.setRoot("login_view");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to logout: " + e.getMessage());
         }
     }
 
