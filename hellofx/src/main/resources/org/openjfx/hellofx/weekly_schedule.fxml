@@ -15,6 +15,7 @@
                 <TableColumn fx:id="startCol" text="Start"/>
                 <TableColumn fx:id="endCol" text="End"/>
                 <TableColumn fx:id="titleCol" text="Session"/>
+                <TableColumn fx:id="actionCol" text="Actions"/>
             </columns>
         </TableView>
     </center>

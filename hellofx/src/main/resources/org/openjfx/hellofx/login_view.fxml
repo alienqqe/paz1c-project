@@ -16,5 +16,5 @@
    <PasswordField fx:id="passwordField" promptText="Password" />
    <Button mnemonicParsing="false" onAction="#onLogin" text="Login" maxWidth="Infinity" />
    <Label fx:id="statusLabel" textFill="red" wrapText="true" />
-   <Label text="Default admin: admin / admin123" style="-fx-text-fill: #666; -fx-font-size: 11px;" />
+   <Label text="Default admin: admin / default password: admin123" style="-fx-text-fill: #666; -fx-font-size: 11px;" />
 </VBox>

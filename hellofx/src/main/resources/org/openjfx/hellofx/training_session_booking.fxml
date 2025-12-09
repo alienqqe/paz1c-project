@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -37,17 +38,30 @@
 
             <Label text="Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
             <DatePicker fx:id="datePicker" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-
-            <Label text="Start (HH:mm):" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
-            <TextField fx:id="startField" promptText="09:00" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-
-            <Label text="End (HH:mm):" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
-            <TextField fx:id="endField" promptText="10:00" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
         </children>
     </GridPane>
 
-    <HBox spacing="10">
-        <Button fx:id="saveButton" text="Book Session" onAction="#onSave"/>
-        <Button text="Close" onAction="#onClose"/>
-    </HBox>
+    <VBox spacing="6" prefWidth="360">
+        <Label text="Client suggestions:" />
+        <ListView fx:id="clientSuggestions" prefHeight="80" visible="false" managed="false" />
+        <Label text="Coach suggestions:" />
+        <ListView fx:id="coachSuggestions" prefHeight="80" visible="false" managed="false" />
+    </VBox>
+
+    <VBox spacing="8" prefWidth="360">
+        <Label text="Available slots for selected date:" />
+        <ListView fx:id="slotsList" prefHeight="180.0" />
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Label text="Start (HH:mm):" />
+            <TextField fx:id="startTimeField" promptText="14:00" prefWidth="80" />
+            <Label text="End (HH:mm):" />
+            <TextField fx:id="endTimeField" promptText="15:00" prefWidth="80" />
+        </HBox>
+        <HBox spacing="10">
+            <Button text="Load slots" onAction="#onLoadSlots" />
+            <Button fx:id="saveButton" text="Book selected slot" onAction="#onSave" />
+            <Button text="Close" onAction="#onClose" />
+        </HBox>
+        <Label fx:id="statusLabel" textFill="red" wrapText="true" />
+    </VBox>
 </VBox>

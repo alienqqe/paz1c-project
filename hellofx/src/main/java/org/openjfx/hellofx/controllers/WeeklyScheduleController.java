@@ -10,6 +10,8 @@ import org.openjfx.hellofx.model.WeeklySession;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
@@ -22,6 +24,7 @@ public class WeeklyScheduleController {
     @FXML private TableColumn<WeeklySession, String> startCol;
     @FXML private TableColumn<WeeklySession, String> endCol;
     @FXML private TableColumn<WeeklySession, String> titleCol;
+    @FXML private TableColumn<WeeklySession, String> actionCol;
 
     private final TimetableDAO coachDao = new TimetableDAO();
 
@@ -33,6 +36,7 @@ public class WeeklyScheduleController {
         startCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().start().toString()));
         endCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().end().toString()));
         titleCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().title()));
+        actionCol.setCellFactory(col -> new TableCellWithDelete());
         loadCurrentWeek();
     }
 
@@ -42,6 +46,41 @@ public class WeeklyScheduleController {
             table.getItems().setAll(coachDao.getWeeklySessions(weekStart));
         } catch (SQLException e) {
             // show alert or log
+        }
+    }
+
+    private class TableCellWithDelete extends javafx.scene.control.TableCell<WeeklySession, String> {
+        private final Button deleteBtn = new Button("Delete");
+
+        TableCellWithDelete() {
+            deleteBtn.setOnAction(e -> {
+                WeeklySession session = getTableView().getItems().get(getIndex());
+                if (session == null || session.id() == null) {
+                    return;
+                }
+                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Delete this session?", javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
+                confirm.showAndWait().ifPresent(btn -> {
+                    if (btn == javafx.scene.control.ButtonType.OK) {
+                        try {
+                            coachDao.deleteTrainingSession(session.id());
+                            loadCurrentWeek();
+                        } catch (SQLException ex) {
+                            Alert err = new Alert(Alert.AlertType.ERROR, "Failed to delete: " + ex.getMessage());
+                            err.showAndWait();
+                        }
+                    }
+                });
+            });
+        }
+
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                setGraphic(null);
+            } else {
+                setGraphic(deleteBtn);
+            }
         }
     }
 }

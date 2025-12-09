@@ -6,6 +6,7 @@ import java.time.DayOfWeek;
 
 
 public record WeeklySession(
+    Long id,
     String coachName,
     String clientName,
     DayOfWeek day,

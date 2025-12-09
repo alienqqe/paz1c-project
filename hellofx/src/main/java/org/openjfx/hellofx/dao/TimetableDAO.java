@@ -19,25 +19,15 @@ public class TimetableDAO {
         LocalDate weekEnd = weekStart.plusDays(7);
         String sql = """
              SELECT c.name AS coach_name,
+                   ts.id AS id,
                    cl.name AS client_name,
                    ts.startDate,
                    ts.endDate,
-                   ts.title,
-                   0 AS is_availability
+                   ts.title
             FROM training_sessions ts
             JOIN coaches c ON c.id = ts.coach_id
             JOIN clients cl ON cl.id = ts.client_id
             WHERE ts.startDate >= ? AND ts.startDate < ?
-            UNION ALL
-             SELECT c.name AS coach_name,
-                   'Available' AS client_name,
-                   ca.startDate,
-                   ca.endDate,
-                   COALESCE(ca.note, 'Available'),
-                   1 AS is_availability
-            FROM coach_availability ca
-            JOIN coaches c ON c.id = ca.coach_id
-            WHERE ca.startDate >= ? AND ca.startDate < ?
             ORDER BY coach_name, startDate
                 """;
 
@@ -48,24 +38,22 @@ public class TimetableDAO {
 
                 stmt.setTimestamp(1, Timestamp.valueOf(weekStart.atStartOfDay()));
                 stmt.setTimestamp(2, Timestamp.valueOf(weekEnd.atStartOfDay()));
-                stmt.setTimestamp(3, Timestamp.valueOf(weekStart.atStartOfDay()));
-                stmt.setTimestamp(4, Timestamp.valueOf(weekEnd.atStartOfDay()));
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    while (rs.next()) {
-                        LocalDateTime startDt = rs.getTimestamp("startDate").toLocalDateTime();
-                        LocalDateTime endDt = rs.getTimestamp("endDate").toLocalDateTime();
-                        results.add(new WeeklySession(
-                            rs.getString("coach_name"),
-                            rs.getString("client_name"),
-                            startDt.toLocalDate().getDayOfWeek(),
-                            startDt.toLocalTime(),
-                            endDt.toLocalTime(),
-                            rs.getString("title")
-                        ));
-                    }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    LocalDateTime startDt = rs.getTimestamp("startDate").toLocalDateTime();
+                    LocalDateTime endDt = rs.getTimestamp("endDate").toLocalDateTime();
+                    results.add(new WeeklySession(
+                        rs.getLong("id"),
+                        rs.getString("coach_name"),
+                        rs.getString("client_name"),
+                        startDt.toLocalDate().getDayOfWeek(),
+                        startDt.toLocalTime(),
+                        endDt.toLocalTime(),
+                        rs.getString("title")
+                    ));
                 }
-            return results;
+            }
+        return results;
             }
     }
 
@@ -84,5 +72,39 @@ public class TimetableDAO {
             stmt.setString(5, title);
             stmt.executeUpdate();
         }
+    }
+
+    public void deleteTrainingSession(Long id) throws SQLException {
+        String sql = "DELETE FROM training_sessions WHERE id = ?";
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, id);
+            stmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Returns true if the coach has any overlapping session in the given interval.
+     */
+    public boolean hasConflictingSession(Long coachId, LocalDateTime start, LocalDateTime end) throws SQLException {
+        String sql = """
+            SELECT COUNT(*) AS cnt
+            FROM training_sessions
+            WHERE coach_id = ?
+              AND NOT (endDate <= ? OR startDate >= ?)
+        """;
+
+        try (Connection conn = Database.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setLong(1, coachId);
+            stmt.setTimestamp(2, Timestamp.valueOf(start));
+            stmt.setTimestamp(3, Timestamp.valueOf(end));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("cnt") > 0;
+                }
+            }
+        }
+        return false;
     }
 }
