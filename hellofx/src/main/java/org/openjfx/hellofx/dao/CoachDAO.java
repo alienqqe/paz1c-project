@@ -1,16 +1,16 @@
 package org.openjfx.hellofx.dao;
 
-import org.openjfx.hellofx.entities.Coach;
-import org.openjfx.hellofx.utils.Database;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.openjfx.hellofx.entities.Coach;
+import org.openjfx.hellofx.utils.Database;
 
 public class CoachDAO {
 

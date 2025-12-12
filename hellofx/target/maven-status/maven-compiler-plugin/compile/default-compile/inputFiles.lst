@@ -1,15 +1,33 @@
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\App.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\SecondaryController.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\utils\Database.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\entities\TrainingSession.java
-C:\project_paz\hellofx\src\main\java\module-info.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\dao\ClientDAO.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\controllers\AssignMembershipController.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\dao\MembershipDAO.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\entities\CoachAvailability.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\entities\Membership.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\controllers\MembershipController.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\entities\Coach.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\PrimaryController.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\controllers\RegisterController.java
-C:\project_paz\hellofx\src\main\java\org\openjfx\hellofx\entities\Client.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\AssignMembershipController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\Membership.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\RegisterCoachController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\App.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\ClientDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\utils\Database.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\LoginController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\utils\AuthService.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\MembershipController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\SecondaryController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\module-info.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\CoachDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\UserDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\VisitDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\MembershipDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\PrimaryController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\TimetableDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\CoachAvailability.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\model\WeeklySession.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\model\AvailabilitySlot.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\AddAvailabilityController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\dao\CoachAvailabilityDAO.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\Client.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\UserManagementController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\CoachSearchController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\RegisterController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\TrainingSessionBookingController.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\TrainingSession.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\utils\AuthContext.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\User.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\Visit.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\entities\Coach.java
+C:\Users\Dream Store\OneDrive\Desktop\project_paz_khuina\hellofx\src\main\java\org\openjfx\hellofx\controllers\WeeklyScheduleController.java
