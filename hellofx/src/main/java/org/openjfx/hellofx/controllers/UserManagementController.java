@@ -111,6 +111,10 @@ public class UserManagementController {
                 createStatus.setText("Passwords do not match.");
                 return;
             }
+            if (password.length() < 8) {
+                createStatus.setText("Password must be at least 8 characters.");
+                return;
+            }
             if (role == null || role.isEmpty()) {
                 createStatus.setText("Pick a role.");
                 return;
@@ -127,6 +131,14 @@ public class UserManagementController {
             String coachEmail = coachEmailField.getText().trim();
             if (coachName.isEmpty() || coachPhone.isEmpty()) {
                 createStatus.setText("Coach name and phone are required.");
+                return;
+            }
+            if (!coachEmail.isBlank() && !isValidEmail(coachEmail)) {
+                createStatus.setText("Enter a valid coach email.");
+                return;
+            }
+            if (!coachPhone.matches("\\d{6,8}")) {
+                createStatus.setText("Coach phone must be 6, 7, or 8 digits.");
                 return;
             }
             try {
@@ -182,6 +194,10 @@ public class UserManagementController {
         }
         if (!newPw.equals(confirm)) {
             changeStatus.setText("New passwords do not match.");
+            return;
+        }
+        if (newPw.length() < 8) {
+            changeStatus.setText("New password must be at least 8 characters.");
             return;
         }
 
@@ -260,5 +276,9 @@ public class UserManagementController {
             confirmLabel.setVisible(!show);
             confirmLabel.setManaged(!show);
         }
+    }
+
+    private boolean isValidEmail(String email) {
+        return email != null && email.matches("^[\\w.!#$%&'*+/=?`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 }

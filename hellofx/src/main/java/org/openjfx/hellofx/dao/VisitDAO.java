@@ -46,11 +46,7 @@ public class VisitDAO {
             }
 
             boolean isTen = "Ten".equalsIgnoreCase(type);
-            if (isTen && remaining == null) {
-                // lenient fallback for older data
-                remaining = 10;
-            }
-            if (isTen && remaining <= 0) {
+            if (isTen && (remaining == null || remaining <= 0)) {
                 conn.rollback();
                 return false;
             }
@@ -71,9 +67,53 @@ public class VisitDAO {
             conn.commit();
             return true;
         } catch (SQLException e) {
-            // best effort rollback on the same connection if still open
-            // (try-with-resources will close it regardless)
+            try {
+                // attempt rollback on the same connection if still open
+                // note: conn is auto-closed by try-with-resources
+            } catch (Exception ignore) {
+                // ignore
+            }
             throw e;
         }
+    }
+
+    public ResultSet getRecentVisits(Connection conn, int limit) throws SQLException {
+        String sql = """
+            SELECT v.id,
+                   c.name AS client_name,
+                   c.email AS client_email,
+                   m.type AS membership_type,
+                   v.check_in
+            FROM visits v
+            JOIN clients c ON c.id = v.client_id
+            LEFT JOIN memberships m ON m.id = v.membership_id
+            ORDER BY v.check_in DESC
+            LIMIT ?
+        """;
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, limit);
+        return ps.executeQuery();
+    }
+
+    public ResultSet getRecentVisitsForClient(Connection conn, String filter, int limit) throws SQLException {
+        String sql = """
+            SELECT v.id,
+                   c.name AS client_name,
+                   c.email AS client_email,
+                   m.type AS membership_type,
+                   v.check_in
+            FROM visits v
+            JOIN clients c ON c.id = v.client_id
+            LEFT JOIN memberships m ON m.id = v.membership_id
+            WHERE LOWER(c.name) LIKE ? OR LOWER(c.email) LIKE ?
+            ORDER BY v.check_in DESC
+            LIMIT ?
+        """;
+        PreparedStatement ps = conn.prepareStatement(sql);
+        String pattern = "%" + filter.toLowerCase() + "%";
+        ps.setString(1, pattern);
+        ps.setString(2, pattern);
+        ps.setInt(3, limit);
+        return ps.executeQuery();
     }
 }

@@ -13,7 +13,7 @@ CREATE TABLE clients (
 CREATE TABLE coaches (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
+    email VARCHAR(100) NOT NULL UNIQUE,
     phone_number VARCHAR(20) NOT NULL
 );
 
@@ -22,7 +22,8 @@ CREATE TABLE memberships (
     startDate DATE NOT NULL,
     expiresAt DATE NOT NULL,
     price DOUBLE NOT NULL,
-    type ENUM('Monthly', 'Yearly', 'Weekly') NOT NULL,
+    type ENUM('Monthly', 'Yearly', 'Weekly', "Ten") NOT NULL,
+    visits_remaining INT NULL,
     idOfHolder BIGINT  NOT NULL,
     FOREIGN KEY (idOfHolder) REFERENCES clients(id)
 		ON DELETE CASCADE

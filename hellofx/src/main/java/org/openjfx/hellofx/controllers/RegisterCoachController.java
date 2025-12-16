@@ -27,20 +27,30 @@ public class RegisterCoachController {
         String email = emailField.getText().trim();
         String phone = phoneField.getText().trim();
 
-        if (name.isEmpty() || phone.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Name and phone are required.");
+        if (name.isEmpty() || phone.isEmpty() || email.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Name, email, and phone are required.");
+            return;
+        }
+        if (!isValidEmail(email)) {
+            showAlert(Alert.AlertType.WARNING, "Enter a valid email address.");
+            return;
+        }
+        if (!phone.matches("\\d{6,8}")) {
+            showAlert(Alert.AlertType.WARNING, "Phone must be 6, 7, or 8 digits.");
             return;
         }
 
-        String emailValue = email.isEmpty() ? null : email;
-        Coach coach = new Coach(null, name, emailValue, phone, null, null);
+        Coach coach = new Coach(null, name, email, phone, null, null);
 
         try {
             Long coachId = coachDAO.addCoach(coach);
+            if (coachId == null) {
+                showAlert(Alert.AlertType.ERROR, "Failed to create coach.");
+                return;
+            }
 
-            String username = (emailValue != null && !emailValue.isBlank())
-                ? emailValue
-                : "coach" + coachId;
+            String normalizedName = name.trim().replaceAll("\\s+", "_").toLowerCase();
+            String username = normalizedName + coachId;
             String initialPassword = phone; // initial password set to phone; coach should change it later
 
             if (coachId != null) {
@@ -66,5 +76,9 @@ public class RegisterCoachController {
         nameField.clear();
         emailField.clear();
         phoneField.clear();
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[\\w.!#$%&'*+/=?`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 }

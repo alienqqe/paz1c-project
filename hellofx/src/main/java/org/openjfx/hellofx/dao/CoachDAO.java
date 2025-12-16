@@ -82,15 +82,6 @@ public class CoachDAO {
             }
         }
 
-        // try pattern coach<id>
-        if (username.startsWith("coach")) {
-            String suffix = username.substring(5);
-            try {
-                return Long.parseLong(suffix);
-            } catch (NumberFormatException ignore) {
-                // ignore
-            }
-        }
 
         // try exact name match
         String nameSql = "SELECT id FROM coaches WHERE LOWER(name) = LOWER(?) LIMIT 1";

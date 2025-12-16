@@ -5,7 +5,7 @@ module hellofx {
     requires transitive javafx.graphics;
     requires io.github.cdimascio.dotenv.java;
     requires jbcrypt;
-    
-     opens org.openjfx.hellofx.controllers to javafx.fxml;
+
+    opens org.openjfx.hellofx.controllers to javafx.fxml, javafx.base;
     exports org.openjfx.hellofx;
 }

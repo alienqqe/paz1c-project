@@ -33,6 +33,14 @@ public class RegisterController {
             showAlert(Alert.AlertType.WARNING, "All fields are required.");
             return;
         }
+        if (!isValidEmail(email)) {
+            showAlert(Alert.AlertType.WARNING, "Enter a valid email address.");
+            return;
+        }
+        if (!phone.matches("\\d{6,8}")) {
+            showAlert(Alert.AlertType.WARNING, "Phone must be 6, 7, or 8 digits.");
+            return;
+        }
 
         Client client = new Client(null, name, email, phone);
         
@@ -55,5 +63,9 @@ public class RegisterController {
         nameField.clear();
         emailField.clear();
         phoneField.clear();
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[\\w.!#$%&'*+/=?`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 }

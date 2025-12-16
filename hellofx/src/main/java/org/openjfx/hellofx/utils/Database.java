@@ -3,16 +3,17 @@ package org.openjfx.hellofx.utils;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Database {
     private static final Dotenv dotenv = Dotenv.load();
 
-    // читаємо порт з .env або використовуємо 3306 за замовчуванням
+   
     private static final String PORT = 
-            (dotenv.get("PORT") == null || dotenv.get("PORT").isBlank())
+            (dotenv.get("DB_PORT") == null || dotenv.get("DB_PORT").isBlank())
                     ? "3306"
-                    : dotenv.get("PORT");
+                    : dotenv.get("DB_PORT");
 
     private static final String URL = 
             "jdbc:mysql://localhost:" + PORT + "/gym_db?allowPublicKeyRetrieval=true&useSSL=false";

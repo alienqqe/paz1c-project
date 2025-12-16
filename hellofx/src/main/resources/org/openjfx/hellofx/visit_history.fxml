@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.openjfx.hellofx.controllers.VisitHistoryController">
+    <top>
+        <HBox spacing="8.0" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <children>
+                <TextField fx:id="searchField" promptText="Filter by name or email" prefWidth="240"/>
+                <Button text="Search" onAction="#onSearch"/>
+                <Button text="Clear" onAction="#onClear"/>
+            </children>
+        </HBox>
+    </top>
+    <center>
+        <TableView fx:id="table">
+            <columns>
+                <TableColumn fx:id="clientCol" text="Client"/>
+                <TableColumn fx:id="emailCol" text="Email"/>
+                <TableColumn fx:id="membershipCol" text="Membership"/>
+                <TableColumn fx:id="checkInCol" text="Check-in"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

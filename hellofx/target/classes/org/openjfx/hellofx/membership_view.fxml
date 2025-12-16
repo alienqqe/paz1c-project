@@ -64,7 +64,6 @@
          <HBox fx:id="actionsRow1" alignment="CENTER" spacing="10">
             <children>
                <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegisterNewClient" text="Register new client" />
-               <Button fx:id="registerCoachButton" mnemonicParsing="false" onAction="#onRegisterNewCoach" text="Register new coach" />
                <Button fx:id="searchCoachButton" mnemonicParsing="false" onAction="#onSearchCoach" text="Search coaches" />
                <Button fx:id="weeklyScheduleButton" mnemonicParsing="false" onAction="#onOpenWeeklySchedule" text="Weekly timetable" />
             </children>
@@ -72,6 +71,7 @@
          <HBox fx:id="actionsRow2" alignment="CENTER" spacing="10">
             <children>
                <Button fx:id="bookSessionButton" mnemonicParsing="false" onAction="#onBookTrainingSession" text="Book training session" />
+               <Button fx:id="visitHistoryButton" mnemonicParsing="false" onAction="#onOpenVisitHistory" text="Visit history" />
                <Button fx:id="manageUsersButton" mnemonicParsing="false" onAction="#onManageUsers" text="Manage users (admin)" />
                <Button fx:id="availabilityButton" mnemonicParsing="false" onAction="#onAddAvailability" text="Add availability (coach)" />
                <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#onLogout" text="Logout" />
