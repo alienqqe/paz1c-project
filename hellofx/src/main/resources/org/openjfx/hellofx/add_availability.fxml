@@ -15,29 +15,29 @@
         <Insets top="16" right="16" bottom="16" left="16"/>
     </padding>
     <children>
-        <Label text="Add availability window" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Label text="%availability.title" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
         <GridPane hgap="10" vgap="8">
             <columnConstraints>
                 <ColumnConstraints minWidth="120" halignment="RIGHT"/>
                 <ColumnConstraints minWidth="180"/>
             </columnConstraints>
             <children>
-                <Label text="Date:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label text="%availability.date" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                 <DatePicker fx:id="datePicker" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-                <Label text="Start (HH:mm):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label text="%availability.start" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                 <TextField fx:id="startField" promptText="09:00" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-                <Label text="End (HH:mm):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Label text="%availability.end" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
                 <TextField fx:id="endField" promptText="11:00" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-                <Label text="Note (optional):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                <TextField fx:id="noteField" promptText="e.g. Morning availability" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                <Label text="%availability.note" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                <TextField fx:id="noteField" promptText="%availability.note.prompt" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
             </children>
         </GridPane>
         <HBox spacing="10">
-            <Button fx:id="saveButton" text="Save" onAction="#onSave"/>
-            <Button text="Cancel" onAction="#onCancel"/>
+            <Button fx:id="saveButton" text="%availability.save" onAction="#onSave"/>
+            <Button text="%availability.cancel" onAction="#onCancel"/>
         </HBox>
     </children>
 </VBox>

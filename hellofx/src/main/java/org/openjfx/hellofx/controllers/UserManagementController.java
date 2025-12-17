@@ -1,7 +1,9 @@
 package org.openjfx.hellofx.controllers;
 
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,12 +17,14 @@ import org.openjfx.hellofx.utils.AuthContext;
 import org.openjfx.hellofx.utils.AuthService;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 
-public class UserManagementController {
+public class UserManagementController implements Initializable {
 
     @FXML
     private TextField newUsernameField;
@@ -90,10 +94,29 @@ public class UserManagementController {
     private final CoachDAO coachDAO = DaoFactory.coaches();
     private final SpecializationDAO specializationDAO = DaoFactory.specializations();
     private final UserDAO userDAO = DaoFactory.users();
+    private ResourceBundle resources;
 
     @FXML
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         roleChoice.getItems().addAll(Arrays.asList("STAFF", "ADMIN", "COACH"));
+        roleChoice.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(String role) {
+                if (role == null) return "";
+                return switch (role.toUpperCase()) {
+                    case "ADMIN" -> get("role.admin");
+                    case "COACH" -> get("role.coach");
+                    case "STAFF" -> get("role.staff");
+                    default -> role;
+                };
+            }
+
+            @Override
+            public String fromString(String string) {
+                return string;
+            }
+        });
         roleChoice.getSelectionModel().select("STAFF");
         roleChoice.getSelectionModel().selectedItemProperty().addListener((obs, oldV, newV) -> toggleCoachFields("COACH".equalsIgnoreCase(newV)));
 
@@ -107,7 +130,7 @@ public class UserManagementController {
         createStatus.setText("");
 
         if (!AuthContext.isAdmin()) {
-            createStatus.setText("Only admins can create users.");
+            createStatus.setText(get("um.error.onlyAdmin"));
             return;
         }
 
@@ -120,31 +143,31 @@ public class UserManagementController {
 
         if (!isCoach) {
             if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                createStatus.setText("Fill all fields.");
+                createStatus.setText(get("um.error.fillAll"));
                 return;
             }
             try {
                 if (userDAO.findByUsername(username).isPresent()) {
-                    createStatus.setText("Username already exists.");
+                    createStatus.setText(get("um.error.usernameExists"));
                     return;
                 }
             } catch (SQLException e) {
-                createStatus.setText("Failed to check username: " + e.getMessage());
+                createStatus.setText(get("um.error.checkUsername") + ": " + e.getMessage());
                 return;
             }
             if (!password.equals(confirm)) {
-                createStatus.setText("Passwords do not match.");
+                createStatus.setText(get("um.error.passwordMismatch"));
                 return;
             }
             if (password.length() < 8) {
-                createStatus.setText("Password must be at least 8 characters.");
+                createStatus.setText(get("um.error.passwordLength"));
                 return;
             }
 
         
 
             if (role == null || role.isEmpty()) {
-                createStatus.setText("Pick a role.");
+                createStatus.setText(get("um.error.pickRole"));
                 return;
             }
         } else {
@@ -160,15 +183,15 @@ public class UserManagementController {
             String coachSpecsRaw = coachSpecializationsField != null ? coachSpecializationsField.getText().trim() : "";
 
             if (coachName.isEmpty() || coachPhone.isEmpty()) {
-                createStatus.setText("Coach name and phone are required.");
+                createStatus.setText(get("um.error.coachRequired"));
                 return;
             }
             if (coachEmail.isBlank()) {
-                createStatus.setText("Coach email is required.");
+                createStatus.setText(get("um.error.coachEmailRequired"));
                 return;
             }
             if (!isValidEmail(coachEmail)) {
-                createStatus.setText("Enter a valid coach email.");
+                createStatus.setText(get("um.error.coachEmailInvalid"));
                 return;
             }
 
@@ -180,7 +203,7 @@ public class UserManagementController {
                 username = coachName;
                 // ensure username unique for coach
                 if (userDAO.findByUsername(username).isPresent()) {
-                    createStatus.setText("Username already exists. Choose another name for login.");
+                    createStatus.setText(get("um.error.coachUsernameExists"));
                     return;
                 }
                 coachId = coachDAO.addCoach(coach);
@@ -191,7 +214,7 @@ public class UserManagementController {
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
-                createStatus.setText("Failed to create coach: " + e.getMessage());
+                createStatus.setText(get("um.error.createCoach") + ": " + e.getMessage());
                 return;
             }
         }
@@ -199,7 +222,7 @@ public class UserManagementController {
         try {
             authService.createUser(username, password, role, coachId);
             createStatus.setStyle("-fx-text-fill: green;");
-            createStatus.setText("User created.");
+            createStatus.setText(get("um.success.userCreated"));
             newUsernameField.clear();
             newPasswordField.clear();
             newPasswordConfirmField.clear();
@@ -212,7 +235,7 @@ public class UserManagementController {
         } catch (SQLException e) {
             e.printStackTrace();
             createStatus.setStyle("-fx-text-fill: red;");
-            createStatus.setText("Failed: " + e.getMessage());
+            createStatus.setText(get("um.error.createFailed") + ": " + e.getMessage());
         }
     }
 
@@ -222,7 +245,7 @@ public class UserManagementController {
         changeStatus.setText("");
         User current = AuthContext.getCurrentUser();
         if (current == null) {
-            changeStatus.setText("Not logged in.");
+            changeStatus.setText(get("um.error.notLoggedIn"));
             return;
         }
 
@@ -231,15 +254,15 @@ public class UserManagementController {
         String confirm = confirmSelfPasswordField.getText();
 
         if (currentPw.isEmpty() || newPw.isEmpty() || confirm.isEmpty()) {
-            changeStatus.setText("Fill all fields.");
+            changeStatus.setText(get("um.error.fillAll"));
             return;
         }
         if (!newPw.equals(confirm)) {
-            changeStatus.setText("New passwords do not match.");
+            changeStatus.setText(get("um.error.newPasswordMismatch"));
             return;
         }
         if (newPw.length() < 8) {
-            changeStatus.setText("New password must be at least 8 characters.");
+            changeStatus.setText(get("um.error.newPasswordLength"));
             return;
         }
 
@@ -247,18 +270,18 @@ public class UserManagementController {
             boolean changed = authService.changePassword(current.id(), currentPw, newPw);
             if (changed) {
                 changeStatus.setStyle("-fx-text-fill: green;");
-                changeStatus.setText("Password updated.");
+                changeStatus.setText(get("um.success.passwordUpdated"));
                 currentPasswordField.clear();
                 newSelfPasswordField.clear();
                 confirmSelfPasswordField.clear();
             } else {
                 changeStatus.setStyle("-fx-text-fill: red;");
-                changeStatus.setText("Current password incorrect.");
+                changeStatus.setText(get("um.error.currentPasswordIncorrect"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
             changeStatus.setStyle("-fx-text-fill: red;");
-            changeStatus.setText("Failed: " + e.getMessage());
+            changeStatus.setText(get("um.error.changeFailed") + ": " + e.getMessage());
         }
     }
 
@@ -345,6 +368,10 @@ public class UserManagementController {
             }
         }
         return specs;
+    }
+
+    private String get(String key) {
+        return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
     }
 
 }

@@ -1,8 +1,10 @@
 package org.openjfx.hellofx.controllers;
 
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.DiscountRuleDAO;
@@ -12,19 +14,21 @@ import org.openjfx.hellofx.entities.DiscountRule;
 import org.openjfx.hellofx.entities.Membership;
 
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.util.StringConverter;
 
-public class AssignMembershipController {
+public class AssignMembershipController implements Initializable {
 
     @FXML
     private Label clientNameLabel;
     @FXML
-    private ChoiceBox<String> membershipTypeChoice;
+    private ChoiceBox<Membership.MembershipType> membershipTypeChoice;
     @FXML
     private DatePicker startDatePicker;
     @FXML
@@ -36,19 +40,43 @@ public class AssignMembershipController {
     private Button cancelButton;
     
     private Runnable onSaved;
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
-        membershipTypeChoice.getItems().addAll("Monthly", "Yearly", "Weekly", "Ten");
+    @Override
+    public void initialize(URL url, ResourceBundle resources) {
+        this.resources = resources;
+        membershipTypeChoice.getItems().addAll(
+            Membership.MembershipType.Monthly,
+            Membership.MembershipType.Yearly,
+            Membership.MembershipType.Weekly,
+            Membership.MembershipType.Ten
+        );
+        membershipTypeChoice.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Membership.MembershipType type) {
+                if (type == null) return "";
+                return switch (type) {
+                    case Ten -> get("membership.type.ten");
+                    case Monthly -> get("membership.type.monthly");
+                    case Weekly -> get("membership.type.weekly");
+                    case Yearly -> get("membership.type.yearly");
+                };
+            }
+
+            @Override
+            public Membership.MembershipType fromString(String string) {
+                return null;
+            }
+        });
     }
 
     @FXML
     private void onConfirm() {
-        String type = membershipTypeChoice.getValue();
+        Membership.MembershipType enumType = membershipTypeChoice.getValue();
         String price = priceField.getText();
         // Validate input
-        if (type == null || type.isEmpty()) {
-            showAlert("Please select a membership type.");
+        if (enumType == null) {
+            showAlert(get("assign.error.selectType"));
             return;
         }
 
@@ -71,25 +99,16 @@ public class AssignMembershipController {
                 }
             }
         } catch (NumberFormatException e) {
-            showAlert("Invalid price. Enter a valid number.");
+            showAlert(get("assign.error.price"));
             return;
         }
 
         LocalDate start = (startDatePicker.getValue() != null) ? startDatePicker.getValue() : LocalDate.now();
         LocalDate expires;
-        Membership.MembershipType enumType;
-
-         if ("Ten".equalsIgnoreCase(type) || "10 Visits".equalsIgnoreCase(type)) {
-             enumType = Membership.MembershipType.Ten;
-             // default expiry window for 10 visits
-             expires = start.plusMonths(3);
-         } else {
-            try {
-                enumType = Membership.MembershipType.valueOf(type);
-            } catch (IllegalArgumentException ex) {
-                enumType = Membership.MembershipType.Monthly;
-            }
-
+        if (enumType == Membership.MembershipType.Ten) {
+            // default expiry window for 10 visits
+            expires = start.plusMonths(3);
+        } else {
             switch (enumType) {
                 case Monthly -> expires = start.plusMonths(1);
                 case Yearly -> expires = start.plusYears(1);
@@ -104,14 +123,11 @@ public class AssignMembershipController {
         MembershipDAO dao = DaoFactory.memberships();
         try {
             dao.addMembership(membership);
-            System.out.println("Assigned " + type + " membership to client id " + clientId);
+            System.out.println("Assigned membership to client id " + clientId);
             if (appliedPercent > 0) {
-                showInfo(
-                    "Discount applied: " + appliedPercent + "% off (visits so far: " + visitCount + ").\n" +
-                    "Original price: " + basePrice + " -> Final price: " + priceVal
-                );
+                showInfo(String.format(get("assign.discount.applied"), appliedPercent, visitCount, basePrice, priceVal));
             } else {
-                showInfo("No discount rule matched. Visits so far: " + visitCount + ".");
+                showInfo(String.format(get("assign.discount.none"), visitCount));
             }
             if (onSaved != null) {
                 onSaved.run();
@@ -120,7 +136,7 @@ public class AssignMembershipController {
             confirmButton.getScene().getWindow().hide();
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Failed to save membership: " + e.getMessage());
+            showAlert(get("assign.error.save") + ": " + e.getMessage());
         }
     }
 
@@ -155,5 +171,9 @@ public class AssignMembershipController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    private String get(String key) {
+        return (resources != null && resources.containsKey(key)) ? resources.getString(key) : key;
     }
 }

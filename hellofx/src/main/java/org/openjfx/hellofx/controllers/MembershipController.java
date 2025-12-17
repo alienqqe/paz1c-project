@@ -3,7 +3,10 @@ package org.openjfx.hellofx.controllers;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.net.URL;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.ResourceBundle;
 
 import org.openjfx.hellofx.App;
 import org.openjfx.hellofx.dao.ClientDAO;
@@ -18,11 +21,13 @@ import org.openjfx.hellofx.utils.AuthService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -34,8 +39,9 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
-public class MembershipController {
+public class MembershipController implements Initializable {
 
     @FXML
     private VBox resultsBox;
@@ -85,14 +91,21 @@ public class MembershipController {
     @FXML
     private Text titleText;
 
+    @FXML
+    private ComboBox<String> languageCombo;
+
+    private ResourceBundle resources;
+
     private final AuthService authService = new AuthService();
     private final ClientDAO clientDAO = DaoFactory.clients();
     private final MembershipDAO membershipDAO = DaoFactory.memberships();
     private final SpecializationDAO specializationDAO = DaoFactory.specializations();
     private final VisitDAO visitDAO = DaoFactory.visits();
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
+        setupLanguageSelector();
         if (manageUsersButton != null) {
             manageUsersButton.setDisable(!AuthContext.isAdmin());
             manageUsersButton.setVisible(AuthContext.isAdmin());
@@ -117,7 +130,7 @@ public class MembershipController {
             visitHistoryButton.setVisible(canViewHistory);
         }
         if (titleText != null && isCoach) {
-            titleText.setText("Coach dashboard");
+            titleText.setText(get("membership.title.coach"));
         }
 
         if (isCoach) {
@@ -164,12 +177,12 @@ public class MembershipController {
         if (!AuthContext.isCoach()) return;
         var current = AuthContext.getCurrentUser();
         if (current == null || current.coachId() == null) {
-            showAlert(Alert.AlertType.ERROR, "Coach profile not linked.");
+            showAlert(Alert.AlertType.ERROR, get("membership.coachProfile.notLinked"));
             return;
         }
 
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Coach Profile");
+        dialog.setTitle(get("membership.coachProfile.title"));
         dialog.initModality(Modality.APPLICATION_MODAL);
 
         PasswordField currentPw = new PasswordField();
@@ -190,10 +203,10 @@ public class MembershipController {
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(8);
-        grid.addRow(0, new Label("Current password:"), currentPw);
-        grid.addRow(1, new Label("New password:"), newPw);
-        grid.addRow(2, new Label("Confirm new:"), confirmPw);
-        grid.addRow(3, new Label("Specializations (comma-separated):"), specsField);
+        grid.addRow(0, new Label(get("membership.coachProfile.currentPassword")), currentPw);
+        grid.addRow(1, new Label(get("membership.coachProfile.newPassword")), newPw);
+        grid.addRow(2, new Label(get("membership.coachProfile.confirmNew")), confirmPw);
+        grid.addRow(3, new Label(get("membership.coachProfile.specializations")), specsField);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
@@ -210,21 +223,21 @@ public class MembershipController {
         String cfm = confirmPw.getText();
         if (!curr.isBlank() || !npw.isBlank() || !cfm.isBlank()) {
             if (curr.isBlank() || npw.isBlank() || cfm.isBlank()) {
-                showAlert(Alert.AlertType.WARNING, "Fill all password fields or leave all empty.");
+                showAlert(Alert.AlertType.WARNING, get("membership.coachProfile.password.fill"));
                 return;
             }
             if (!npw.equals(cfm)) {
-                showAlert(Alert.AlertType.WARNING, "New passwords do not match.");
+                showAlert(Alert.AlertType.WARNING, get("membership.coachProfile.password.mismatch"));
                 return;
             }
             try {
                 boolean changed = authService.changePassword(current.id(), curr, npw);
                 if (!changed) {
-                    showAlert(Alert.AlertType.ERROR, "Current password incorrect.");
+                    showAlert(Alert.AlertType.ERROR, get("membership.coachProfile.password.incorrect"));
                     return;
                 }
             } catch (SQLException e) {
-                showAlert(Alert.AlertType.ERROR, "Failed to change password: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, get("membership.coachProfile.password.fail") + ": " + e.getMessage());
                 return;
             }
         }
@@ -233,9 +246,9 @@ public class MembershipController {
         try {
             var specs = parseSpecializations(specsField.getText());
             specializationDAO.setSpecializationsForCoach(current.coachId(), specs);
-            showAlert(Alert.AlertType.INFORMATION, "Profile updated.");
+            showAlert(Alert.AlertType.INFORMATION, get("membership.coachProfile.updated"));
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Failed to update specializations: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.coachProfile.specs.fail") + ": " + e.getMessage());
         }
     }
 
@@ -257,19 +270,19 @@ public class MembershipController {
         resultsList.getItems().clear();
 
         if (query.isEmpty()) {
-            searchStatus.setText("Please enter a name or email.");
-            resultsBox.setVisible(false);
-            return;
-        }
+                searchStatus.setText(get("membership.search.enter"));
+                resultsBox.setVisible(false);
+                return;
+            }
 
         try {
             List<Client> found = clientDAO.searchClients(query);
 
             if (found.isEmpty()) {
-                searchStatus.setText("No users found.");
+                searchStatus.setText(get("membership.search.none"));
                 resultsBox.setVisible(false);
             } else {
-                searchStatus.setText("Found " + found.size() + " user(s):");
+                searchStatus.setText(String.format(get("membership.search.found"), found.size()));
                 resultsBox.setVisible(true);
                 for (Client c : found) {
                     HBox row = createClientRow(c);
@@ -279,7 +292,7 @@ public class MembershipController {
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showError("Error fetching clients: " + e.getMessage());
+            showError(get("error.fetch.clients") + ": " + e.getMessage());
         }
     }
 
@@ -294,22 +307,22 @@ public class MembershipController {
 
     // Creates one row in the results list: "Client Name  [Assign Button]"
     private HBox createClientRow(Client client) {
-        String membershipLabelText = "None";
+        String membershipLabelText = get("membership.type.none");
+        String currentType = null;
         Integer remainingVisits = null;
         try {
-            String currentType = membershipDAO.getCurrentMembershipType(client.id());
+            currentType = membershipDAO.getCurrentMembershipType(client.id());
             if (currentType != null) {
-                boolean currentHasLeft = currentType.toLowerCase().contains("left");
                 membershipLabelText = switch (currentType) {
-                    case "Ten" -> "10 Visits";
-                    case "Monthly" -> "Monthly";
-                    case "Weekly" -> "Weekly";
-                    case "Yearly" -> "Yearly";
+                    case "Ten" -> get("membership.type.ten");
+                    case "Monthly" -> get("membership.type.monthly");
+                    case "Weekly" -> get("membership.type.weekly");
+                    case "Yearly" -> get("membership.type.yearly");
                     default -> currentType;
                 };
                 remainingVisits = membershipDAO.getRemainingVisits(client.id());
-                if (!currentHasLeft && membershipLabelText.toLowerCase().contains("10") && remainingVisits != null) {
-                    membershipLabelText = membershipLabelText + " (" + remainingVisits + " left)";
+                if ("Ten".equalsIgnoreCase(currentType) && remainingVisits != null) {
+                    membershipLabelText = membershipLabelText + " " + String.format(get("membership.left"), remainingVisits);
                 }
             }
         } catch (SQLException ex) {
@@ -317,21 +330,22 @@ public class MembershipController {
         }
 
         boolean isAdmin = AuthContext.isAdmin();
-        Label nameLabel = new Label(client.email() + " (" + client.name() + ") - Membership: " + membershipLabelText);
-        Button assignButton = new Button("Assign");
+        Label nameLabel = new Label(client.email() + " (" + client.name() + ") - " + get("membership.label") + ": " + membershipLabelText);
+        Button assignButton = new Button(get("membership.assign"));
         assignButton.setOnAction(e -> openAssignMembershipWindow(client));
 
-        Button deleteBtn = new Button("Delete");
-        deleteBtn.setDisable(!isAdmin || "none".equalsIgnoreCase(membershipLabelText));
+        Button deleteBtn = new Button(get("membership.delete"));
+        boolean hasMembership = currentType != null;
+        deleteBtn.setDisable(!isAdmin || !hasMembership);
         deleteBtn.setOnAction(e -> {
             if (!AuthContext.isAdmin()) {
-                showAlert(Alert.AlertType.WARNING, "Only admins can delete memberships.");
+                showAlert(Alert.AlertType.WARNING, get("membership.delete.onlyAdmin"));
                 return;
             }
 
             boolean confirmed = confirmDelete(
-                "Delete Membership",
-                "Are you sure you want to delete membership for " + client.name() + "?"
+                get("membership.delete.title"),
+                String.format(get("membership.delete.confirm"), client.name())
             );
 
             if (confirmed) {
@@ -345,9 +359,8 @@ public class MembershipController {
             }
         });
 
-        Button checkInButton = new Button("Check In");
-        boolean isTenMembership = membershipLabelText.toLowerCase().contains("10");
-        boolean hasMembership = !"none".equalsIgnoreCase(membershipLabelText);
+        Button checkInButton = new Button(get("membership.checkin"));
+        boolean isTenMembership = "Ten".equalsIgnoreCase(currentType);
         boolean tenExhausted = isTenMembership && remainingVisits != null && remainingVisits <= 0;
         boolean hasActiveMembership = true;
         try {
@@ -367,13 +380,13 @@ public class MembershipController {
                     if (idx >= 0) {
                         resultsList.getItems().set(idx, refreshed);
                     }
-                    showAlert(Alert.AlertType.INFORMATION, "Check-in successful!");
+                    showAlert(Alert.AlertType.INFORMATION, get("membership.checkin.ok"));
                 } else {
-                    showAlert(Alert.AlertType.WARNING, "No valid membership found.");
+                    showAlert(Alert.AlertType.WARNING, get("membership.checkin.invalid"));
                 }
             } catch (SQLException ex) {
                 ex.printStackTrace();
-                showAlert(Alert.AlertType.ERROR, "Check-in failed: " + ex.getMessage());
+                showAlert(Alert.AlertType.ERROR, get("membership.checkin.fail") + ": " + ex.getMessage());
             }
         });
 
@@ -385,134 +398,128 @@ public class MembershipController {
     @FXML
     void onRegisterNewClient(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/register_view.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/register_view.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("Register New Client");
+            stage.setTitle(get("window.register"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Error");
-            alert.setContentText("Failed to open registration window.");
-            alert.showAndWait();
+            showError(get("membership.open.register.error"));
         }
     }
 
     @FXML
     void onSearchCoach(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/coach_search_view.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/coach_search_view.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("Search Coaches");
+            stage.setTitle(get("window.coachSearch"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setHeaderText("Error");
-            alert.setContentText("Failed to open coach search window.");
-            alert.showAndWait();
+            showError(get("membership.open.coachSearch.error"));
         }
     }
 
     @FXML
     void onOpenWeeklySchedule(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/weekly_schedule.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/weekly_schedule.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("Weekly Timetable");
+            stage.setTitle(get("window.weeklySchedule"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to open weekly timetable: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.open.weeklySchedule.error") + ": " + e.getMessage());
         }
     }
 
     @FXML
     void onBookTrainingSession(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/training_session_booking.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/training_session_booking.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("Book Training Session");
+            stage.setTitle(get("window.booking"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to open booking window: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.open.booking.error") + ": " + e.getMessage());
         }
     }
 
     @FXML
     void onManageUsers(ActionEvent event) {
         if (!AuthContext.isAdmin()) {
-            showAlert(Alert.AlertType.WARNING, "Only admins can manage users.");
+            showAlert(Alert.AlertType.WARNING, get("membership.manageUsers.onlyAdmin"));
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/user_management.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/user_management.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("User Management");
+            stage.setTitle(get("window.userManagement"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to open user management: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.open.userManagement.error") + ": " + e.getMessage());
         }
     }
 
     @FXML
     void onOpenVisitHistory(ActionEvent event) {
         if (!(AuthContext.isAdmin() || !AuthContext.isCoach())) {
-            showAlert(Alert.AlertType.WARNING, "Only admins or staff can view visit history.");
+            showAlert(Alert.AlertType.WARNING, get("membership.visitHistory.onlyAdminStaff"));
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/visit_history.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/visit_history.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("Visit History");
+            stage.setTitle(get("window.visitHistory"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to open visit history: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.open.visitHistory.error") + ": " + e.getMessage());
         }
     }
 
     @FXML
     void onAddAvailability(ActionEvent event) {
         if (!AuthContext.isCoach()) {
-            showAlert(Alert.AlertType.WARNING, "Only coaches can add availability.");
+            showAlert(Alert.AlertType.WARNING, get("membership.availability.onlyCoach"));
             return;
         }
         if (AuthContext.getCurrentUser() == null || AuthContext.getCurrentUser().coachId() == null) {
-            showAlert(Alert.AlertType.ERROR, "Your account is not linked to a coach profile.");
+            showAlert(Alert.AlertType.ERROR, get("membership.availability.noProfile"));
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/add_availability.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/add_availability.fxml"), App.getBundle());
             Parent root = loader.load();
 
             Stage stage = new Stage();
-            stage.setTitle("Add Availability");
+            stage.setTitle(get("window.addAvailability"));
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to open availability window: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.open.availability.error") + ": " + e.getMessage());
         }
     }
 
@@ -523,31 +530,31 @@ public class MembershipController {
             App.setRoot("login_view");
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to logout: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.logout.fail") + ": " + e.getMessage());
         }
     }
 
     @FXML
     void onDiscount(ActionEvent event){
         try {
-         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/openjfx/hellofx/discount_rules.fxml"));
+         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/openjfx/hellofx/discount_rules.fxml"), App.getBundle());
          Parent root = loader.load();
 
          Stage dialog = new Stage();
-         dialog.setTitle("Discount rules");
+         dialog.setTitle(get("window.discountRules"));
          dialog.initModality(Modality.APPLICATION_MODAL);
          dialog.setScene(new Scene(root));
          dialog.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to open discount window: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("membership.open.discount.error") + ": " + e.getMessage());
         }
         
     }
 
     private void openAssignMembershipWindow(Client client) {
         try {
-            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/assign_view.fxml"));
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/assign_view.fxml"), App.getBundle());
             Parent root = loader.load();
 
             AssignMembershipController controller = loader.getController();
@@ -555,20 +562,54 @@ public class MembershipController {
             controller.setOnSaved(() -> onSearchButton(null));
 
             Stage stage = new Stage();
-            stage.setTitle("Assign Membership - " + client.name());
+            stage.setTitle(String.format(get("window.assignMembership"), client.name()));
             stage.setScene(new Scene(root));
             stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Error opening membership assignment window.");
+            showError(get("membership.open.assign.error"));
         }
     }
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText("Error");
+        alert.setHeaderText(get("general.error"));
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void setupLanguageSelector() {
+        if (languageCombo == null) return;
+        languageCombo.getItems().setAll("en", "sk");
+        languageCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(String code) {
+                return switch (code) {
+                    case "sk" -> get("lang.sk");
+                    case "en" -> get("lang.en");
+                    default -> code;
+                };
+            }
+
+            @Override
+            public String fromString(String string) {
+                return string;
+            }
+        });
+        String current = "sk".equals(App.getCurrentLocale().getLanguage()) ? "sk" : "en";
+        languageCombo.getSelectionModel().select(current);
+        languageCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.equals(oldVal)) return;
+            try {
+                App.switchLocale(Locale.forLanguageTag(newVal));
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, get("login.error.load"));
+            }
+        });
+    }
+
+    private String get(String key) {
+        return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
     }
 }

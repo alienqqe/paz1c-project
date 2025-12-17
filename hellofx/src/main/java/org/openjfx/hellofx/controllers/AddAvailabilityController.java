@@ -2,6 +2,7 @@ package org.openjfx.hellofx.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -12,12 +13,14 @@ import org.openjfx.hellofx.dao.CoachDAO;
 import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.utils.AuthContext;
 
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ResourceBundle;
 
-public class AddAvailabilityController {
+public class AddAvailabilityController implements Initializable {
 
     @FXML private DatePicker datePicker;
     @FXML private TextField startField;
@@ -27,11 +30,17 @@ public class AddAvailabilityController {
 
     private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
     private final CoachDAO coachDAO = DaoFactory.coaches();
+    private ResourceBundle resources;
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
+    }
 
     @FXML
     void onSave(ActionEvent event) {
         if (!AuthContext.isCoach()) {
-            showAlert(Alert.AlertType.WARNING, "Only coaches can add availability.");
+            showAlert(Alert.AlertType.WARNING, get("availability.error.onlyCoach"));
             return;
         }
 
@@ -44,7 +53,7 @@ public class AddAvailabilityController {
             }
         }
         if (coachId == null) {
-            showAlert(Alert.AlertType.ERROR, "Your account is not linked to a coach profile.");
+            showAlert(Alert.AlertType.ERROR, get("availability.error.noCoachProfile"));
             return;
         }
 
@@ -54,7 +63,7 @@ public class AddAvailabilityController {
         String note = noteField.getText().trim();
 
         if (date == null || startText.isEmpty() || endText.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Please fill date, start and end time.");
+            showAlert(Alert.AlertType.WARNING, get("availability.error.fill"));
             return;
         }
 
@@ -65,18 +74,18 @@ public class AddAvailabilityController {
             LocalDateTime end = date.atTime(endTime);
 
             if (!end.isAfter(start)) {
-                showAlert(Alert.AlertType.WARNING, "End time must be after start time.");
+                showAlert(Alert.AlertType.WARNING, get("availability.error.endAfter"));
                 return;
             }
 
-            availabilityDAO.addAvailability(coachId, start, end, note.isEmpty() ? "Available" : note);
-            showAlert(Alert.AlertType.INFORMATION, "Availability saved.");
+            availabilityDAO.addAvailability(coachId, start, end, note.isEmpty() ? get("availability.defaultNote") : note);
+            showAlert(Alert.AlertType.INFORMATION, get("availability.success.saved"));
             closeWindow();
         } catch (java.time.format.DateTimeParseException dtpe) {
-            showAlert(Alert.AlertType.ERROR, "Time must be in HH:mm format.");
+            showAlert(Alert.AlertType.ERROR, get("availability.error.timeFormat"));
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Failed to save availability: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("availability.error.save") + ": " + e.getMessage());
         }
     }
 
@@ -95,5 +104,9 @@ public class AddAvailabilityController {
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();
+    }
+
+    private String get(String key) {
+        return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
     }
 }

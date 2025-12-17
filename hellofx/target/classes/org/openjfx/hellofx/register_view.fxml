@@ -12,16 +12,16 @@
    <children>
       <VBox alignment="CENTER" spacing="30.0">
          <children>
-            <Label text="Register a new client">
+            <Label text="%register.title">
                <font>
                   <Font name="System Bold" size="24.0" />
                </font>
             </Label>
-            <TextField fx:id="nameField" maxWidth="300.0" promptText="Full name" />
-            <TextField fx:id="emailField" maxWidth="300.0" promptText="Email" />
-            <TextField fx:id="phoneField" maxWidth="300.0" promptText="Phone number" />
-            <Button mnemonicParsing="false" onAction="#onRegisterButton" text="Register" />
-            <Label fx:id="statusLabel" text="Label" visible="false" />
+            <TextField fx:id="nameField" maxWidth="300.0" promptText="%register.name" />
+            <TextField fx:id="emailField" maxWidth="300.0" promptText="%register.email" />
+            <TextField fx:id="phoneField" maxWidth="300.0" promptText="%register.phone" />
+            <Button mnemonicParsing="false" onAction="#onRegisterButton" text="%register.button" />
+            <Label fx:id="statusLabel" text="%register.status.label" visible="false" />
          </children>
       </VBox>
    </children>

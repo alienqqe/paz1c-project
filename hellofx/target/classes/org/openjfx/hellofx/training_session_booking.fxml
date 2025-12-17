@@ -18,7 +18,7 @@
         <Insets top="15" right="15" bottom="15" left="15"/>
     </padding>
 
-    <Label text="Book Training Session" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <Label text="%booking.title" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
 
     <GridPane hgap="10" vgap="10">
         <columnConstraints>
@@ -27,40 +27,40 @@
         </columnConstraints>
 
         <children>
-            <Label text="Title:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-            <TextField fx:id="titleField" promptText="Session title" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+            <Label text="%booking.title.field" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+            <TextField fx:id="titleField" promptText="%booking.title.prompt" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-            <Label text="Client name:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-            <TextField fx:id="clientNameField" promptText="Client full name" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+            <Label text="%booking.client" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+            <TextField fx:id="clientNameField" promptText="%booking.client.prompt" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-            <Label text="Coach name:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-            <TextField fx:id="coachNameField" promptText="Coach full name" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            <Label text="%booking.coach" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+            <TextField fx:id="coachNameField" promptText="%booking.coach.prompt" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-            <Label text="Date:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+            <Label text="%booking.date" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
             <DatePicker fx:id="datePicker" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
         </children>
     </GridPane>
 
     <VBox spacing="6" prefWidth="360">
-        <Label text="Client suggestions:" />
+        <Label text="%booking.client.suggestions" />
         <ListView fx:id="clientSuggestions" prefHeight="80" visible="false" managed="false" />
-        <Label text="Coach suggestions:" />
+        <Label text="%booking.coach.suggestions" />
         <ListView fx:id="coachSuggestions" prefHeight="80" visible="false" managed="false" />
     </VBox>
 
     <VBox spacing="8" prefWidth="360">
-        <Label text="Available slots for selected date:" />
+        <Label text="%booking.slots" />
         <ListView fx:id="slotsList" prefHeight="180.0" />
         <HBox spacing="10" alignment="CENTER_LEFT">
-            <Label text="Start (HH:mm):" />
-            <TextField fx:id="startTimeField" promptText="14:00" prefWidth="80" />
-            <Label text="End (HH:mm):" />
-            <TextField fx:id="endTimeField" promptText="15:00" prefWidth="80" />
+            <Label text="%booking.start" />
+            <TextField fx:id="startTimeField" promptText="%booking.start.prompt" prefWidth="80" />
+            <Label text="%booking.end" />
+            <TextField fx:id="endTimeField" promptText="%booking.end.prompt" prefWidth="80" />
         </HBox>
         <HBox spacing="10">
-            <Button text="Load slots" onAction="#onLoadSlots" />
-            <Button fx:id="saveButton" text="Book selected slot" onAction="#onSave" />
-            <Button text="Close" onAction="#onClose" />
+            <Button text="%booking.loadSlots" onAction="#onLoadSlots" />
+            <Button fx:id="saveButton" text="%booking.save" onAction="#onSave" />
+            <Button text="%booking.close" onAction="#onClose" />
         </HBox>
         <Label fx:id="statusLabel" textFill="red" wrapText="true" />
     </VBox>

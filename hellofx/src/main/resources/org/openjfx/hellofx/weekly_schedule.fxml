@@ -9,13 +9,13 @@
     <center>
         <TableView fx:id="table">
             <columns>
-                <TableColumn fx:id="coachCol" text="Coach"/>
-                <TableColumn fx:id="clientCol" text="Client"/>
-                <TableColumn fx:id="dayCol" text="Day"/>
-                <TableColumn fx:id="startCol" text="Start"/>
-                <TableColumn fx:id="endCol" text="End"/>
-                <TableColumn fx:id="titleCol" text="Session"/>
-                <TableColumn fx:id="actionCol" text="Actions"/>
+                <TableColumn fx:id="coachCol" text="%weekly.coach"/>
+                <TableColumn fx:id="clientCol" text="%weekly.client"/>
+                <TableColumn fx:id="dayCol" text="%weekly.day"/>
+                <TableColumn fx:id="startCol" text="%weekly.start"/>
+                <TableColumn fx:id="endCol" text="%weekly.end"/>
+                <TableColumn fx:id="titleCol" text="%weekly.title"/>
+                <TableColumn fx:id="actionCol" text="%weekly.actions"/>
             </columns>
         </TableView>
     </center>

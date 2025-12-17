@@ -3,6 +3,7 @@ package org.openjfx.hellofx.controllers;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -12,12 +13,14 @@ import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.DiscountRuleDAO;
 import org.openjfx.hellofx.entities.DiscountRule;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class DiscountRulesController {
+public class DiscountRulesController implements Initializable {
 
     @FXML private TextField thresholdsField;
     @FXML private TextField discountsField;
@@ -29,9 +32,11 @@ public class DiscountRulesController {
     @FXML private TableColumn<DiscountRule, Integer> percentCol;
 
     private final DiscountRuleDAO discountRuleDAO = DaoFactory.discountRules();
+    private ResourceBundle resources;
 
     @FXML
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         thresholdCol.setCellValueFactory(cell ->
             new SimpleIntegerProperty(cell.getValue().visitsThreshold()).asObject());
         percentCol.setCellValueFactory(cell ->
@@ -53,7 +58,7 @@ public class DiscountRulesController {
         int[] percents = toIntArray(discountsRaw);
 
         if (thresholds.length != percents.length) {
-            throw new IllegalArgumentException("Number of thresholds and discounts must match.");
+            throw new IllegalArgumentException(get("discount.error.count"));
         }
         if (thresholds.length == 0) {
             return new ArrayList<>();
@@ -63,8 +68,8 @@ public class DiscountRulesController {
         for (int i = 0; i < thresholds.length; i++) {
             int t = thresholds[i];
             int p = percents[i];
-            if (t <= 0) throw new IllegalArgumentException("Thresholds must be positive.");
-            if (p < 0 || p > 100) throw new IllegalArgumentException("Discounts must be 0-100.");
+            if (t <= 0) throw new IllegalArgumentException(get("discount.error.thresholds"));
+            if (p < 0 || p > 100) throw new IllegalArgumentException(get("discount.error.discounts"));
             parsed.add(new DiscountRule(0L, t, p));
         }
         parsed.sort(Comparator.comparingInt(DiscountRule::visitsThreshold));
@@ -75,11 +80,15 @@ public class DiscountRulesController {
         if (raw.isBlank()) {
             return new int[0];
         }
-        return java.util.Arrays.stream(raw.split(","))
-            .map(String::trim)
-            .filter(s -> !s.isEmpty())
-            .mapToInt(Integer::parseInt)
-            .toArray();
+        try {
+            return java.util.Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .mapToInt(Integer::parseInt)
+                .toArray();
+        } catch (NumberFormatException ex) {
+            throw new IllegalArgumentException(get("discount.error.number"));
+        }
     }
 
     @FXML
@@ -87,7 +96,7 @@ public class DiscountRulesController {
         try {
             List<DiscountRule> parsed = parseRules();
             rulesTable.setItems(FXCollections.observableArrayList(parsed));
-            setMessage("Preview only (not saved).", "-fx-text-fill: #444;");
+            setMessage(get("discount.message.preview"), "-fx-text-fill: #444;");
         } catch (Exception ex) {
             setMessage(ex.getMessage(), "-fx-text-fill: red;");
         }
@@ -99,7 +108,7 @@ public class DiscountRulesController {
             List<DiscountRule> parsed = parseRules();
             discountRuleDAO.replaceAll(parsed);
             refreshFromDb();
-            setMessage("Saved " + parsed.size() + " rule(s).", "-fx-text-fill: green;");
+            setMessage(String.format(get("discount.message.saved"), parsed.size()), "-fx-text-fill: green;");
         } catch (Exception ex) {
             setMessage(ex.getMessage(), "-fx-text-fill: red;");
         }
@@ -143,5 +152,9 @@ public class DiscountRulesController {
                 messageLabel.setStyle(style);
             }
         }
+    }
+
+    private String get(String key) {
+        return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
     }
 }

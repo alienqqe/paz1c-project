@@ -12,7 +12,7 @@
 
 <VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.CoachSearchController">
    <children>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Search coaches" textAlignment="CENTER">
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="%coachSearch.title" textAlignment="CENTER">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
@@ -22,12 +22,12 @@
       </Text>
       <HBox alignment="CENTER">
          <children>
-            <TextField fx:id="searchField" promptText="Search by email or name">
+            <TextField fx:id="searchField" promptText="%coachSearch.search.prompt">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
             </TextField>
-            <Button alignment="CENTER" mnemonicParsing="false" onAction="#onSearchButton" text="Search coach">
+            <Button alignment="CENTER" mnemonicParsing="false" onAction="#onSearchButton" text="%coachSearch.search.button">
                <HBox.margin>
                   <Insets left="10.0" />
                </HBox.margin>
@@ -37,7 +37,7 @@
             <Insets top="20.0" />
          </VBox.margin>
       </HBox>
-      <Label fx:id="searchStatus" text="No coaches found">
+      <Label fx:id="searchStatus" text="%coachSearch.status.none">
          <VBox.margin>
             <Insets top="40.0" />
          </VBox.margin>
@@ -53,7 +53,7 @@
             <Insets top="10.0" />
          </VBox.margin>
          <children>
-            <Label text="Search results">
+            <Label text="%coachSearch.results">
                <font>
                   <Font size="14.0" />
                </font>

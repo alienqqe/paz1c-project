@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -14,10 +15,12 @@ import org.openjfx.hellofx.dao.VisitDAO;
 import org.openjfx.hellofx.dao.VisitDAO.VisitView;
 import org.openjfx.hellofx.model.VisitRow;
 
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ResourceBundle;
 
-public class VisitHistoryController {
+public class VisitHistoryController implements Initializable {
 
     @FXML private TableView<VisitRow> table;
     @FXML private TableColumn<VisitRow, String> clientCol;
@@ -27,9 +30,11 @@ public class VisitHistoryController {
     @FXML private TextField searchField;
 
     private final VisitDAO visitDAO = DaoFactory.visits();
+    private ResourceBundle resources;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         clientCol.setCellValueFactory(cell ->
             new SimpleStringProperty(cell.getValue().clientName()));
         emailCol.setCellValueFactory(cell ->
@@ -58,7 +63,7 @@ public class VisitHistoryController {
             }
             table.setItems(rows);
         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to load visit history: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR, get("visit.error.load") + ": " + e.getMessage());
             alert.showAndWait();
         }
     }
@@ -75,6 +80,10 @@ public class VisitHistoryController {
             searchField.clear();
         }
         loadVisits(null);
+    }
+
+    private String get(String key) {
+        return (resources != null && resources.containsKey(key)) ? resources.getString(key) : key;
     }
 
 }

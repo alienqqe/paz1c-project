@@ -2,6 +2,7 @@ package org.openjfx.hellofx.controllers;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -19,14 +20,16 @@ import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.entities.Coach;
 import org.openjfx.hellofx.model.AvailabilitySlot;
 
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-public class TrainingSessionBookingController {
+public class TrainingSessionBookingController implements Initializable {
 
     @FXML private TextField titleField;
     @FXML private TextField clientNameField;
@@ -44,6 +47,7 @@ public class TrainingSessionBookingController {
     private final CoachDAO coachDAO = DaoFactory.coaches();
     private final TimetableDAO timetableDAO = DaoFactory.timetable();
     private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
+    private ResourceBundle resources;
 
     @FXML
     void onSave(ActionEvent event) {
@@ -54,15 +58,15 @@ public class TrainingSessionBookingController {
         AvailabilitySlot selectedSlot = slotsList.getSelectionModel().getSelectedItem();
 
         if (title.isEmpty() || clientName.isEmpty() || coachName.isEmpty() || date == null) {
-            showAlert(Alert.AlertType.WARNING, "Please fill all fields.");
+            showAlert(Alert.AlertType.WARNING, get("booking.error.fill"));
             return;
         }
         if (selectedSlot == null) {
-            showAlert(Alert.AlertType.WARNING, "Please select an availability slot.");
+            showAlert(Alert.AlertType.WARNING, get("booking.error.selectSlot"));
             return;
         }
         if (startTimeField.getText().trim().isEmpty() || endTimeField.getText().trim().isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Please set start and end time within the selected slot.");
+            showAlert(Alert.AlertType.WARNING, get("booking.error.setTimes"));
             return;
         }
 
@@ -75,41 +79,41 @@ public class TrainingSessionBookingController {
             LocalDateTime end = date.atTime(chosenEnd);
 
             if (end.isBefore(LocalDateTime.now())) {
-                showAlert(Alert.AlertType.WARNING, "Cannot book a slot in the past.");
+                showAlert(Alert.AlertType.WARNING, get("booking.error.past"));
                 return;
             }
 
             if (!end.isAfter(start)) {
-                showAlert(Alert.AlertType.WARNING, "End time must be after start time.");
+                showAlert(Alert.AlertType.WARNING, get("booking.error.endAfter"));
                 return;
             }
 
             // ensure within selected availability window
             if (start.isBefore(selectedSlot.start()) || end.isAfter(selectedSlot.end())) {
-                showAlert(Alert.AlertType.WARNING, "Booking must be within the selected availability slot.");
+                showAlert(Alert.AlertType.WARNING, get("booking.error.within"));
                 return;
             }
 
             // ensure within availability
             boolean withinAvailability = availabilityDAO.isWithinAvailability(coachId, start, end);
             if (!withinAvailability) {
-                showAlert(Alert.AlertType.WARNING, "Selected time is outside coach availability.");
+                showAlert(Alert.AlertType.WARNING, get("booking.error.outside"));
                 return;
             }
 
             // prevent double booking
             if (timetableDAO.hasConflictingSession(coachId, start, end)) {
-                showAlert(Alert.AlertType.WARNING, "Coach already has a session during this time.");
+                showAlert(Alert.AlertType.WARNING, get("booking.error.conflict"));
                 return;
             }
 
             timetableDAO.addTrainingSession(clientId, coachId, start, end, title);
-            showAlert(Alert.AlertType.INFORMATION, "Training session booked.");
+            showAlert(Alert.AlertType.INFORMATION, get("booking.success"));
             closeWindow();
         } catch (IllegalArgumentException iae) {
             showAlert(Alert.AlertType.ERROR, iae.getMessage());
         } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Failed to save session: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, get("booking.error.save") + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -122,7 +126,7 @@ public class TrainingSessionBookingController {
         String coachName = coachNameField.getText().trim();
         LocalDate date = datePicker.getValue();
         if (coachName.isEmpty() || date == null) {
-            statusLabel.setText("Enter coach name and date to load slots.");
+            statusLabel.setText(get("booking.status.enter"));
             return;
         }
 
@@ -131,13 +135,13 @@ public class TrainingSessionBookingController {
             Long coachId = resolveCoachIdByName(coachName);
             List<AvailabilitySlot> slots = availabilityDAO.getAvailabilityForDate(coachId, date);
             if (slots.isEmpty()) {
-                statusLabel.setText("No availability for this date.");
+                statusLabel.setText(get("booking.status.none"));
             } else {
                 slotsList.getItems().setAll(slots);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            statusLabel.setText("Failed to load slots: " + e.getMessage());
+            statusLabel.setText(get("booking.status.loadFail") + ": " + e.getMessage());
         } catch (IllegalArgumentException iae) {
             statusLabel.setText(iae.getMessage());
         }
@@ -161,7 +165,8 @@ public class TrainingSessionBookingController {
     }
 
     @FXML
-    public void initialize() {
+    public void initialize(URL location, ResourceBundle resources) {
+        this.resources = resources;
         slotsList.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(AvailabilitySlot item, boolean empty) {
@@ -209,10 +214,10 @@ public class TrainingSessionBookingController {
             .filter(c -> c.name().equalsIgnoreCase(name))
             .toList();
         if (matches.isEmpty()) {
-            throw new IllegalArgumentException("No client found with name: " + name);
+            throw new IllegalArgumentException(String.format(get("booking.error.noClient"), name));
         }
         if (matches.size() > 1) {
-            throw new IllegalArgumentException("Multiple clients found with that name. Please specify uniquely.");
+            throw new IllegalArgumentException(get("booking.error.multipleClient"));
         }
         return matches.get(0).id();
     }
@@ -222,10 +227,10 @@ public class TrainingSessionBookingController {
             .filter(c -> c.name().equalsIgnoreCase(name))
             .toList();
         if (matches.isEmpty()) {
-            throw new IllegalArgumentException("No coach found with name: " + name);
+            throw new IllegalArgumentException(String.format(get("booking.error.noCoach"), name));
         }
         if (matches.size() > 1) {
-            throw new IllegalArgumentException("Multiple coaches found with that name. Please specify uniquely.");
+            throw new IllegalArgumentException(get("booking.error.multipleCoach"));
         }
         return matches.get(0).id();
     }
@@ -290,5 +295,9 @@ public class TrainingSessionBookingController {
     private void hideCoachSuggestions() {
         coachSuggestions.setVisible(false);
         coachSuggestions.setManaged(false);
+    }
+
+    private String get(String key) {
+        return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
     }
 }

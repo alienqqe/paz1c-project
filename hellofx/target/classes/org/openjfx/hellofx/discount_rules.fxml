@@ -13,8 +13,8 @@
             <padding>
                 <Insets top="14" right="16" bottom="10" left="16"/>
             </padding>
-            <Label text="Discount rules" styleClass="h1"/>
-            <Label text="Enter thresholds and discounts as comma-separated lists. Example: thresholds = 10, 100, 1000 and discounts = 10, 50, 100"
+            <Label text="%discount.title" styleClass="h1"/>
+            <Label text="%discount.description"
                    wrapText="true" />
         </VBox>
     </top>
@@ -31,34 +31,34 @@
                     <ColumnConstraints percentWidth="75"/>
                 </columnConstraints>
 
-                <Label text="Thresholds:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                <Label text="%discount.thresholds" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
                 <TextField fx:id="thresholdsField"
                            GridPane.rowIndex="0" GridPane.columnIndex="1"
-                           promptText="e.g. 10, 100, 1000"/>
+                           promptText="%discount.thresholds.prompt"/>
 
-                <Label text="Discounts (%):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                <Label text="%discount.discounts" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
                 <TextField fx:id="discountsField"
                            GridPane.rowIndex="1" GridPane.columnIndex="1"
-                           promptText="e.g. 10, 50, 100"/>
+                           promptText="%discount.discounts.prompt"/>
 
-                <Label text="Note:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                <Label text="Item i in discounts belongs to item i in thresholds. Values must have the same count."
+                <Label text="%discount.note" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                <Label text="%discount.note.text"
                        wrapText="true"
                        GridPane.rowIndex="2" GridPane.columnIndex="1"/>
             </GridPane>
 
             <HBox spacing="10">
-                <Button text="Preview" onAction="#onPreview"/>
+                <Button text="%discount.preview" onAction="#onPreview"/>
                 <Label fx:id="messageLabel" text="" wrapText="true"/>
             </HBox>
 
             <Separator/>
 
-            <Label text="Preview table:"/>
+            <Label text="%discount.preview.table"/>
             <TableView fx:id="rulesTable" prefHeight="240">
                 <columns>
-                    <TableColumn fx:id="thresholdCol" text="Visits threshold" prefWidth="200"/>
-                    <TableColumn fx:id="percentCol" text="Discount (%)" prefWidth="150"/>
+                    <TableColumn fx:id="thresholdCol" text="%discount.column.threshold" prefWidth="200"/>
+                    <TableColumn fx:id="percentCol" text="%discount.column.percent" prefWidth="150"/>
                 </columns>
             </TableView>
         </VBox>
@@ -69,8 +69,8 @@
         <padding>
             <Insets top="14" right="14" bottom="14" left="14"/>
         </padding>
-            <Button text="Cancel" onAction="#onCancel"/>
-            <Button text="Save" defaultButton="true" onAction="#onSave"/>
+            <Button text="%discount.cancel" onAction="#onCancel"/>
+            <Button text="%discount.save" defaultButton="true" onAction="#onSave"/>
         </HBox>
     </bottom>
 </BorderPane>

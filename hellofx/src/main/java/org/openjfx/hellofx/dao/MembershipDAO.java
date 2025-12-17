@@ -66,19 +66,7 @@ public class MembershipDAO {
             ps.setLong(1, clientId);
             ps.setDate(2, today);
             ps.setDate(3, today);
-        }, (rs, i) -> {
-            String type = rs.getString("type");
-            Integer remaining = rs.getObject("visits_remaining", Integer.class);
-            java.sql.Date expires = rs.getDate("expiresAt");
-            String base = type;
-            if ("Ten".equalsIgnoreCase(type) && remaining != null) {
-                base = base + " (" + remaining + " left)";
-            }
-            if (expires == null) {
-                return base + " (Permanent)";
-            }
-            return base;
-        });
+        }, (rs, i) -> rs.getString("type"));
         return res.isEmpty() ? null : res.get(0);
     }
 
