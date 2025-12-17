@@ -1,18 +1,24 @@
 package org.openjfx.hellofx.controllers;
 
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.openjfx.hellofx.dao.CoachDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.SpecializationDAO;
+import org.openjfx.hellofx.dao.UserDAO;
+import org.openjfx.hellofx.entities.Coach;
+import org.openjfx.hellofx.entities.User;
+import org.openjfx.hellofx.utils.AuthContext;
+import org.openjfx.hellofx.utils.AuthService;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import org.openjfx.hellofx.entities.User;
-import org.openjfx.hellofx.entities.Coach;
-import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.utils.AuthContext;
-import org.openjfx.hellofx.utils.AuthService;
-
-import java.sql.SQLException;
-import java.util.Arrays;
 
 public class UserManagementController {
 
@@ -47,6 +53,10 @@ public class UserManagementController {
     private TextField coachPhoneField;
 
     @FXML
+    private TextField coachSpecializationsField;
+
+
+    @FXML
     private Label coachNameLabel;
 
     @FXML
@@ -54,6 +64,9 @@ public class UserManagementController {
 
     @FXML
     private Label coachPhoneLabel;
+
+    @FXML
+    private Label coachSpecializationsLabel;
 
     @FXML
     private Label coachNoteLabel;
@@ -74,7 +87,9 @@ public class UserManagementController {
     private Label changeStatus;
 
     private final AuthService authService = new AuthService();
-    private final CoachDAO coachDAO = new CoachDAO();
+    private final CoachDAO coachDAO = DaoFactory.coaches();
+    private final SpecializationDAO specializationDAO = DaoFactory.specializations();
+    private final UserDAO userDAO = DaoFactory.users();
 
     @FXML
     public void initialize() {
@@ -101,10 +116,20 @@ public class UserManagementController {
         String confirm = newPasswordConfirmField.getText();
         String role = roleChoice.getSelectionModel().getSelectedItem();
         boolean isCoach = "COACH".equalsIgnoreCase(role);
+        
 
         if (!isCoach) {
             if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
                 createStatus.setText("Fill all fields.");
+                return;
+            }
+            try {
+                if (userDAO.findByUsername(username).isPresent()) {
+                    createStatus.setText("Username already exists.");
+                    return;
+                }
+            } catch (SQLException e) {
+                createStatus.setText("Failed to check username: " + e.getMessage());
                 return;
             }
             if (!password.equals(confirm)) {
@@ -115,6 +140,9 @@ public class UserManagementController {
                 createStatus.setText("Password must be at least 8 characters.");
                 return;
             }
+
+        
+
             if (role == null || role.isEmpty()) {
                 createStatus.setText("Pick a role.");
                 return;
@@ -129,25 +157,38 @@ public class UserManagementController {
             String coachName = coachNameField.getText().trim();
             String coachPhone = coachPhoneField.getText().trim();
             String coachEmail = coachEmailField.getText().trim();
+            String coachSpecsRaw = coachSpecializationsField != null ? coachSpecializationsField.getText().trim() : "";
+
             if (coachName.isEmpty() || coachPhone.isEmpty()) {
                 createStatus.setText("Coach name and phone are required.");
                 return;
             }
-            if (!coachEmail.isBlank() && !isValidEmail(coachEmail)) {
+            if (coachEmail.isBlank()) {
+                createStatus.setText("Coach email is required.");
+                return;
+            }
+            if (!isValidEmail(coachEmail)) {
                 createStatus.setText("Enter a valid coach email.");
                 return;
             }
-            if (!coachPhone.matches("\\d{6,8}")) {
-                createStatus.setText("Coach phone must be 6, 7, or 8 digits.");
-                return;
-            }
+
             try {
-                Coach coach = new Coach(null, coachName, coachEmail.isBlank() ? null : coachEmail, coachPhone, null, null);
+                var specNames = coachSpecsRaw.isBlank() ? java.util.Set.<String>of() : parseSpecializations(coachSpecsRaw);
+
+                Coach coach = new Coach(null, coachName, coachEmail, coachPhone, null, null);
+                // auto-assign username/password for coach: username = name, password = phone
+                username = coachName;
+                // ensure username unique for coach
+                if (userDAO.findByUsername(username).isPresent()) {
+                    createStatus.setText("Username already exists. Choose another name for login.");
+                    return;
+                }
                 coachId = coachDAO.addCoach(coach);
-                // auto-assign username/password for coach
-                username = !coachEmail.isBlank() ? coachEmail : "coach" + coachId;
                 password = coachPhone;
                 confirm = coachPhone;
+                if (coachId != null && !specNames.isEmpty()) {
+                    specializationDAO.setSpecializationsForCoach(coachId, specNames);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
                 createStatus.setText("Failed to create coach: " + e.getMessage());
@@ -165,6 +206,7 @@ public class UserManagementController {
             if (coachNameField != null) coachNameField.clear();
             if (coachEmailField != null) coachEmailField.clear();
             if (coachPhoneField != null) coachPhoneField.clear();
+            if (coachSpecializationsField != null) coachSpecializationsField.clear();
             roleChoice.getSelectionModel().select("STAFF");
             toggleCoachFields(false);
         } catch (SQLException e) {
@@ -234,6 +276,10 @@ public class UserManagementController {
             coachPhoneField.setVisible(show);
             coachPhoneField.setManaged(show);
         }
+        if (coachSpecializationsField != null) {
+            coachSpecializationsField.setVisible(show);
+            coachSpecializationsField.setManaged(show);
+        }
         if (coachNameLabel != null) {
             coachNameLabel.setVisible(show);
             coachNameLabel.setManaged(show);
@@ -245,6 +291,10 @@ public class UserManagementController {
         if (coachPhoneLabel != null) {
             coachPhoneLabel.setVisible(show);
             coachPhoneLabel.setManaged(show);
+        }
+        if (coachSpecializationsLabel != null) {
+            coachSpecializationsLabel.setVisible(show);
+            coachSpecializationsLabel.setManaged(show);
         }
         if (coachNoteLabel != null) {
             coachNoteLabel.setVisible(show);
@@ -279,6 +329,22 @@ public class UserManagementController {
     }
 
     private boolean isValidEmail(String email) {
-        return email != null && email.matches("^[\\w.!#$%&'*+/=?`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        // regex was taken from https://www.baeldung.com/java-email-validation-regex
+        return email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
     }
+
+    private java.util.Set<String> parseSpecializations(String raw) {
+        if (raw == null || raw.isBlank()) return java.util.Set.of();
+        java.util.Set<String> specs = new java.util.HashSet<>();
+        String[] parts = raw.split(",");
+        for (String part : parts) {
+            if (part == null) continue;
+            String trimmed = part.trim();
+            if (!trimmed.isEmpty()) {
+                specs.add(trimmed);
+            }
+        }
+        return specs;
+    }
+
 }

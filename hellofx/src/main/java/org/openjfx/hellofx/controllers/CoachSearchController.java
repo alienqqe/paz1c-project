@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.openjfx.hellofx.dao.CoachDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.entities.Coach;
 
 import java.sql.SQLException;
@@ -21,7 +22,7 @@ public class CoachSearchController {
     @FXML private TextField searchField;
     @FXML private Label searchStatus;
 
-    private final CoachDAO coachDAO = new CoachDAO();
+    private final CoachDAO coachDAO = DaoFactory.coaches();
 
     @FXML
     void onSearchButton(ActionEvent event) {

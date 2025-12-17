@@ -4,101 +4,65 @@ import org.mindrot.jbcrypt.BCrypt;
 import org.openjfx.hellofx.entities.User;
 import org.openjfx.hellofx.utils.Database;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Optional;
 
 public class UserDAO {
 
     public Optional<User> findByUsername(String username) throws SQLException {
         String sql = "SELECT id, username, password_hash, role, coach_id FROM users WHERE username = ?";
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, username);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapUser(rs));
-                }
-            }
-        }
-        return Optional.empty();
+        List<User> users = Database.jdbc().query(sql, ps -> ps.setString(1, username), this::mapUser);
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
     }
 
     public Optional<User> findById(Long id) throws SQLException {
         String sql = "SELECT id, username, password_hash, role, coach_id FROM users WHERE id = ?";
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setLong(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapUser(rs));
-                }
-            }
-        }
-        return Optional.empty();
+        List<User> users = Database.jdbc().query(sql, ps -> ps.setLong(1, id), this::mapUser);
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
     }
 
     public long countUsers() throws SQLException {
         String sql = "SELECT COUNT(*) FROM users";
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            if (rs.next()) {
-                return rs.getLong(1);
-            }
-        }
-        return 0;
+        Long count = Database.jdbc().queryForObject(sql, Long.class);
+        return count == null ? 0 : count;
     }
 
     public void createUser(String username, String rawPassword, String role, Long coachId) throws SQLException {
         String sql = "INSERT INTO users (username, password_hash, role, coach_id) VALUES (?, ?, ?, ?)";
         String hashed = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username);
-            stmt.setString(2, hashed);
-            stmt.setString(3, role);
+        Database.jdbc().update(sql, ps -> {
+            ps.setString(1, username);
+            ps.setString(2, hashed);
+            ps.setString(3, role);
             if (coachId != null) {
-                stmt.setLong(4, coachId);
+                ps.setLong(4, coachId);
             } else {
-                stmt.setNull(4, java.sql.Types.BIGINT);
+                ps.setNull(4, java.sql.Types.BIGINT);
             }
-            stmt.executeUpdate();
-        }
+        });
     }
 
     public void updatePassword(Long userId, String rawPassword) throws SQLException {
         String sql = "UPDATE users SET password_hash = ? WHERE id = ?";
         String hashed = BCrypt.hashpw(rawPassword, BCrypt.gensalt());
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, hashed);
-            stmt.setLong(2, userId);
-            stmt.executeUpdate();
-        }
+        Database.jdbc().update(sql, hashed, userId);
     }
 
     public void updateCoachId(Long userId, Long coachId) throws SQLException {
         String sql = "UPDATE users SET coach_id = ? WHERE id = ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        Database.jdbc().update(sql, ps -> {
             if (coachId != null) {
-                stmt.setLong(1, coachId);
+                ps.setLong(1, coachId);
             } else {
-                stmt.setNull(1, java.sql.Types.BIGINT);
+                ps.setNull(1, java.sql.Types.BIGINT);
             }
-            stmt.setLong(2, userId);
-            stmt.executeUpdate();
-        }
+            ps.setLong(2, userId);
+        });
     }
 
-    private User mapUser(ResultSet rs) throws SQLException {
+    private User mapUser(ResultSet rs, int rowNum) throws SQLException {
         return new User(
             rs.getLong("id"),
             rs.getString("username"),

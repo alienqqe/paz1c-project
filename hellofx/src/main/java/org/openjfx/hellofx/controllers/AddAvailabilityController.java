@@ -9,6 +9,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
 import org.openjfx.hellofx.dao.CoachDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.utils.AuthContext;
 
 import java.sql.SQLException;
@@ -24,8 +25,8 @@ public class AddAvailabilityController {
     @FXML private TextField noteField;
     @FXML private Button saveButton;
 
-    private final CoachAvailabilityDAO availabilityDAO = new CoachAvailabilityDAO();
-    private final CoachDAO coachDAO = new CoachDAO();
+    private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
+    private final CoachDAO coachDAO = DaoFactory.coaches();
 
     @FXML
     void onSave(ActionEvent event) {

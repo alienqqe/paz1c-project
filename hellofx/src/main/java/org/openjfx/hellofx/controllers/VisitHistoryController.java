@@ -1,21 +1,21 @@
 package org.openjfx.hellofx.controllers;
 
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.TextField;
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.VisitDAO;
+import org.openjfx.hellofx.dao.VisitDAO.VisitView;
+import org.openjfx.hellofx.model.VisitRow;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
-
-import org.openjfx.hellofx.utils.Database;
+import java.util.List;
 
 public class VisitHistoryController {
 
@@ -26,35 +26,38 @@ public class VisitHistoryController {
     @FXML private TableColumn<VisitRow, LocalDateTime> checkInCol;
     @FXML private TextField searchField;
 
-    private final VisitDAO visitDAO = new VisitDAO();
+    private final VisitDAO visitDAO = DaoFactory.visits();
 
     @FXML
     public void initialize() {
-        clientCol.setCellValueFactory(new PropertyValueFactory<>("clientName"));
-        emailCol.setCellValueFactory(new PropertyValueFactory<>("clientEmail"));
-        membershipCol.setCellValueFactory(new PropertyValueFactory<>("membershipType"));
-        checkInCol.setCellValueFactory(new PropertyValueFactory<>("checkIn"));
+        clientCol.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().clientName()));
+        emailCol.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().clientEmail()));
+        membershipCol.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().membershipType()));
+        checkInCol.setCellValueFactory(cell ->
+            new SimpleObjectProperty<>(cell.getValue().checkIn()));
         loadVisits(null);
     }
 
     private void loadVisits(String filter) {
         ObservableList<VisitRow> rows = FXCollections.observableArrayList();
-        try (Connection conn = Database.getConnection();
-             ResultSet rs = (filter == null || filter.isBlank())
-                 ? visitDAO.getRecentVisits(conn, 200)
-                 : visitDAO.getRecentVisitsForClient(conn, filter.trim(), 200)) {
-            while (rs.next()) {
+        try {
+            List<VisitView> result = (filter == null || filter.isBlank())
+                ? visitDAO.getRecentVisits(200)
+                : visitDAO.getRecentVisitsForClient(filter.trim(), 200);
+            for (VisitView v : result) {
                 rows.add(new VisitRow(
-                    rs.getLong("id"),
-                    rs.getString("client_name"),
-                    rs.getString("client_email"),
-                    rs.getString("membership_type"),
-                    rs.getTimestamp("check_in").toLocalDateTime()
+                    v.id(),
+                    v.clientName(),
+                    v.clientEmail(),
+                    v.membershipType(),
+                    v.checkIn()
                 ));
             }
             table.setItems(rows);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR, "Failed to load visit history: " + e.getMessage());
             alert.showAndWait();
         }
@@ -74,25 +77,4 @@ public class VisitHistoryController {
         loadVisits(null);
     }
 
-    public static class VisitRow {
-        private final Long id;
-        private final String clientName;
-        private final String clientEmail;
-        private final String membershipType;
-        private final LocalDateTime checkIn;
-
-        public VisitRow(Long id, String clientName, String clientEmail, String membershipType, LocalDateTime checkIn) {
-            this.id = id;
-            this.clientName = clientName;
-            this.clientEmail = clientEmail;
-            this.membershipType = membershipType;
-            this.checkIn = checkIn;
-        }
-
-        public Long getId() { return id; }
-        public String getClientName() { return clientName; }
-        public String getClientEmail() { return clientEmail; }
-        public String getMembershipType() { return membershipType; }
-        public LocalDateTime getCheckIn() { return checkIn; }
-    }
 }

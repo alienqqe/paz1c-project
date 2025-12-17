@@ -12,8 +12,9 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.openjfx.hellofx.dao.ClientDAO;
 import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.entities.Coach;
 import org.openjfx.hellofx.model.AvailabilitySlot;
@@ -39,10 +40,10 @@ public class TrainingSessionBookingController {
     @FXML private TextField startTimeField;
     @FXML private TextField endTimeField;
 
-    private final ClientDAO clientDAO = new ClientDAO();
-    private final CoachDAO coachDAO = new CoachDAO();
-    private final TimetableDAO timetableDAO = new TimetableDAO();
-    private final CoachAvailabilityDAO availabilityDAO = new CoachAvailabilityDAO();
+    private final ClientDAO clientDAO = DaoFactory.clients();
+    private final CoachDAO coachDAO = DaoFactory.coaches();
+    private final TimetableDAO timetableDAO = DaoFactory.timetable();
+    private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
 
     @FXML
     void onSave(ActionEvent event) {
@@ -183,7 +184,8 @@ public class TrainingSessionBookingController {
         coachSuggestions.setOnMouseClicked(e -> {
             String sel = coachSuggestions.getSelectionModel().getSelectedItem();
             if (sel != null) {
-                coachNameField.setText(sel);
+                int idx = sel.indexOf(" (");
+                coachNameField.setText(idx > 0 ? sel.substring(0, idx) : sel);
                 hideCoachSuggestions();
             }
         });
@@ -257,14 +259,20 @@ public class TrainingSessionBookingController {
             return;
         }
         try {
-            List<String> names = coachDAO.searchCoaches(query.trim()).stream()
-                .map(Coach::name)
+            List<Coach> matches = coachDAO.searchCoaches(query.trim());
+            List<String> labels = matches.stream()
+                .map(c -> {
+                    String specs = (c.specializations() != null && !c.specializations().isEmpty())
+                        ? " (" + c.specializations().stream().map(s -> s.name()).collect(Collectors.joining(", ")) + ")"
+                        : "";
+                    return c.name() + specs;
+                })
                 .distinct()
                 .collect(Collectors.toList());
-            if (names.isEmpty()) {
+            if (labels.isEmpty()) {
                 hideCoachSuggestions();
             } else {
-                coachSuggestions.getItems().setAll(names);
+                coachSuggestions.getItems().setAll(labels);
                 coachSuggestions.setVisible(true);
                 coachSuggestions.setManaged(true);
             }

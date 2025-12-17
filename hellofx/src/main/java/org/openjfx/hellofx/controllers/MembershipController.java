@@ -7,7 +7,9 @@ import java.util.Optional;
 
 import org.openjfx.hellofx.App;
 import org.openjfx.hellofx.dao.ClientDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.MembershipDAO;
+import org.openjfx.hellofx.dao.SpecializationDAO;
 import org.openjfx.hellofx.dao.VisitDAO;
 import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.utils.AuthContext;
@@ -21,12 +23,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class MembershipController {
@@ -59,6 +65,12 @@ public class MembershipController {
     private Button logoutButton;
 
     @FXML
+    private Button coachProfileButton;
+
+    @FXML
+    private Button discountButton;
+
+    @FXML
     private HBox searchContainer;
 
     @FXML
@@ -74,9 +86,10 @@ public class MembershipController {
     private Text titleText;
 
     private final AuthService authService = new AuthService();
-    private final ClientDAO clientDAO = new ClientDAO();
-    private final MembershipDAO membershipDAO = new MembershipDAO();
-    private final VisitDAO visitDAO = new VisitDAO();
+    private final ClientDAO clientDAO = DaoFactory.clients();
+    private final MembershipDAO membershipDAO = DaoFactory.memberships();
+    private final SpecializationDAO specializationDAO = DaoFactory.specializations();
+    private final VisitDAO visitDAO = DaoFactory.visits();
 
     @FXML
     public void initialize() {
@@ -84,8 +97,16 @@ public class MembershipController {
             manageUsersButton.setDisable(!AuthContext.isAdmin());
             manageUsersButton.setVisible(AuthContext.isAdmin());
         }
+        if (discountButton != null){
+            discountButton.setDisable(!AuthContext.isAdmin());
+            discountButton.setVisible(AuthContext.isAdmin());
+        }
 
         boolean isCoach = AuthContext.isCoach();
+        if (coachProfileButton != null) {
+            coachProfileButton.setVisible(isCoach);
+            coachProfileButton.setManaged(isCoach);
+        }
         if (availabilityButton != null) {
             availabilityButton.setDisable(!isCoach);
             availabilityButton.setVisible(isCoach);
@@ -119,7 +140,7 @@ public class MembershipController {
             }
             if (actionsRow2 != null) {
                 actionsRow2.getChildren().forEach(node -> {
-                    if (node == availabilityButton || node == logoutButton) {
+                    if (node == availabilityButton || node == logoutButton || node == coachProfileButton) {
                         node.setVisible(true);
                         node.setDisable(false);
                         node.setManaged(true);
@@ -136,6 +157,98 @@ public class MembershipController {
         Alert alert = new Alert(type);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    void onCoachProfile() {
+        if (!AuthContext.isCoach()) return;
+        var current = AuthContext.getCurrentUser();
+        if (current == null || current.coachId() == null) {
+            showAlert(Alert.AlertType.ERROR, "Coach profile not linked.");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Coach Profile");
+        dialog.initModality(Modality.APPLICATION_MODAL);
+
+        PasswordField currentPw = new PasswordField();
+        PasswordField newPw = new PasswordField();
+        PasswordField confirmPw = new PasswordField();
+        TextField specsField = new TextField();
+
+        try {
+            var specs = specializationDAO.getSpecializationsForCoach(current.coachId());
+            if (specs != null && !specs.isEmpty()) {
+                String joined = specs.stream().map(s -> s.name()).collect(java.util.stream.Collectors.joining(", "));
+                specsField.setText(joined);
+            }
+        } catch (SQLException e) {
+            // ignore and leave blank
+        }
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(8);
+        grid.addRow(0, new Label("Current password:"), currentPw);
+        grid.addRow(1, new Label("New password:"), newPw);
+        grid.addRow(2, new Label("Confirm new:"), confirmPw);
+        grid.addRow(3, new Label("Specializations (comma-separated):"), specsField);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(btn -> btn);
+        var result = dialog.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        // change password
+        String curr = currentPw.getText();
+        String npw = newPw.getText();
+        String cfm = confirmPw.getText();
+        if (!curr.isBlank() || !npw.isBlank() || !cfm.isBlank()) {
+            if (curr.isBlank() || npw.isBlank() || cfm.isBlank()) {
+                showAlert(Alert.AlertType.WARNING, "Fill all password fields or leave all empty.");
+                return;
+            }
+            if (!npw.equals(cfm)) {
+                showAlert(Alert.AlertType.WARNING, "New passwords do not match.");
+                return;
+            }
+            try {
+                boolean changed = authService.changePassword(current.id(), curr, npw);
+                if (!changed) {
+                    showAlert(Alert.AlertType.ERROR, "Current password incorrect.");
+                    return;
+                }
+            } catch (SQLException e) {
+                showAlert(Alert.AlertType.ERROR, "Failed to change password: " + e.getMessage());
+                return;
+            }
+        }
+
+        // update specializations
+        try {
+            var specs = parseSpecializations(specsField.getText());
+            specializationDAO.setSpecializationsForCoach(current.coachId(), specs);
+            showAlert(Alert.AlertType.INFORMATION, "Profile updated.");
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Failed to update specializations: " + e.getMessage());
+        }
+    }
+
+    private java.util.Set<String> parseSpecializations(String raw) {
+        if (raw == null || raw.isBlank()) return java.util.Set.of();
+        java.util.Set<String> specs = new java.util.HashSet<>();
+        String[] parts = raw.split(",");
+        for (String p : parts) {
+            if (p == null) continue;
+            String t = p.trim();
+            if (!t.isEmpty()) specs.add(t);
+        }
+        return specs;
     }
 
     @FXML
@@ -248,6 +361,12 @@ public class MembershipController {
             try {
                 boolean checkedIn = visitDAO.checkInClient(client.id());
                 if (checkedIn) {
+                    // Refresh the row to reflect updated remaining visits / status
+                    HBox refreshed = createClientRow(client);
+                    int idx = resultsList.getItems().indexOf(checkInButton.getParent());
+                    if (idx >= 0) {
+                        resultsList.getItems().set(idx, refreshed);
+                    }
                     showAlert(Alert.AlertType.INFORMATION, "Check-in successful!");
                 } else {
                     showAlert(Alert.AlertType.WARNING, "No valid membership found.");
@@ -406,6 +525,24 @@ public class MembershipController {
             e.printStackTrace();
             showAlert(Alert.AlertType.ERROR, "Failed to logout: " + e.getMessage());
         }
+    }
+
+    @FXML
+    void onDiscount(ActionEvent event){
+        try {
+         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/openjfx/hellofx/discount_rules.fxml"));
+         Parent root = loader.load();
+
+         Stage dialog = new Stage();
+         dialog.setTitle("Discount rules");
+         dialog.initModality(Modality.APPLICATION_MODAL);
+         dialog.setScene(new Scene(root));
+         dialog.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Failed to open discount window: " + e.getMessage());
+        }
+        
     }
 
     private void openAssignMembershipWindow(Client client) {

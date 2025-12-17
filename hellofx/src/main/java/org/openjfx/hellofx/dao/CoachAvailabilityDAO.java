@@ -1,19 +1,22 @@
 package org.openjfx.hellofx.dao;
 
+import org.openjfx.hellofx.model.AvailabilitySlot;
 import org.openjfx.hellofx.utils.Database;
+import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.sql.ResultSet;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import org.openjfx.hellofx.model.AvailabilitySlot;
 
 public class CoachAvailabilityDAO {
+
+    private final RowMapper<AvailabilitySlot> mapper = (rs, rowNum) -> new AvailabilitySlot(
+        rs.getTimestamp("startDate").toLocalDateTime(),
+        rs.getTimestamp("endDate").toLocalDateTime(),
+        rs.getString("note")
+    );
 
     public void addAvailability(Long coachId, LocalDateTime start, LocalDateTime end, String note) throws SQLException {
         String sql = """
@@ -21,14 +24,12 @@ public class CoachAvailabilityDAO {
             VALUES (?, ?, ?, ?)
         """;
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, coachId);
-            stmt.setTimestamp(2, Timestamp.valueOf(start));
-            stmt.setTimestamp(3, Timestamp.valueOf(end));
-            stmt.setString(4, note);
-            stmt.executeUpdate();
-        }
+        Database.jdbc().update(sql, ps -> {
+            ps.setLong(1, coachId);
+            ps.setTimestamp(2, Timestamp.valueOf(start));
+            ps.setTimestamp(3, Timestamp.valueOf(end));
+            ps.setString(4, note);
+        });
     }
 
     /**
@@ -43,18 +44,12 @@ public class CoachAvailabilityDAO {
               AND endDate >= ?
         """;
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, coachId);
-            stmt.setTimestamp(2, Timestamp.valueOf(start));
-            stmt.setTimestamp(3, Timestamp.valueOf(end));
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong("cnt") > 0;
-                }
-            }
-        }
-        return false;
+        Long count = Database.jdbc().queryForObject(
+            sql,
+            new Object[]{coachId, Timestamp.valueOf(start), Timestamp.valueOf(end)},
+            Long.class
+        );
+        return count != null && count > 0;
     }
 
     public List<AvailabilitySlot> getAvailabilityForDate(Long coachId, LocalDate date) throws SQLException {
@@ -67,33 +62,19 @@ public class CoachAvailabilityDAO {
             ORDER BY startDate
         """;
 
-        List<AvailabilitySlot> slots = new ArrayList<>();
-
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, coachId);
-            stmt.setTimestamp(2, Timestamp.valueOf(date.atStartOfDay()));
-            stmt.setTimestamp(3, Timestamp.valueOf(date.plusDays(1).atStartOfDay()));
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    slots.add(new AvailabilitySlot(
-                        rs.getTimestamp("startDate").toLocalDateTime(),
-                        rs.getTimestamp("endDate").toLocalDateTime(),
-                        rs.getString("note")
-                    ));
-                }
-            }
-        }
-
-        return slots;
+        return Database.jdbc().query(
+            sql,
+            ps -> {
+                ps.setLong(1, coachId);
+                ps.setTimestamp(2, Timestamp.valueOf(date.atStartOfDay()));
+                ps.setTimestamp(3, Timestamp.valueOf(date.plusDays(1).atStartOfDay()));
+            },
+            mapper
+        );
     }
 
     public void deleteExpired() throws SQLException {
         String sql = "DELETE FROM coach_availability WHERE endDate < ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
-            stmt.executeUpdate();
-        }
+        Database.jdbc().update(sql, Timestamp.valueOf(LocalDateTime.now()));
     }
 }

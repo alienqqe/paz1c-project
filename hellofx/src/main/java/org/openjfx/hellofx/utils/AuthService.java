@@ -1,6 +1,7 @@
 package org.openjfx.hellofx.utils;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.UserDAO;
 import org.openjfx.hellofx.entities.User;
 import org.openjfx.hellofx.dao.CoachDAO;
@@ -10,8 +11,8 @@ import java.util.Optional;
 
 public class AuthService {
 
-    private final UserDAO userDAO = new UserDAO();
-    private final CoachDAO coachDAO = new CoachDAO();
+    private final UserDAO userDAO = DaoFactory.users();
+    private final CoachDAO coachDAO = DaoFactory.coaches();
 
    
     public void ensureDefaultAdmin() throws SQLException {

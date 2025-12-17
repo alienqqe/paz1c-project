@@ -6,7 +6,8 @@ CREATE TABLE clients (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL,
-    phone_number VARCHAR(20) NOT NULL
+    phone_number VARCHAR(20) NOT NULL,
+    last_discount_threshold_used INT NOT NULL DEFAULT 0
 );
 
 
@@ -22,7 +23,9 @@ CREATE TABLE memberships (
     startDate DATE NOT NULL,
     expiresAt DATE NOT NULL,
     price DOUBLE NOT NULL,
-    type ENUM('Monthly', 'Yearly', 'Weekly', "Ten") NOT NULL,
+    type ENUM('Monthly', 'Yearly', 'Weekly', 'Ten') NOT NULL,
+    discount_percent_applied INT NOT NULL DEFAULT 0,
+    discount_threshold_used INT NULL,
     visits_remaining INT NULL,
     idOfHolder BIGINT  NOT NULL,
     FOREIGN KEY (idOfHolder) REFERENCES clients(id)
@@ -63,7 +66,7 @@ CREATE TABLE visits (
     FOREIGN KEY (membership_id) REFERENCES memberships(id) ON DELETE CASCADE
 );
 
--- Basic users table for authentication/authorization
+
 CREATE TABLE users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
@@ -82,5 +85,11 @@ CREATE TABLE coach_availability (
     note VARCHAR(200),
     FOREIGN KEY (coach_id) REFERENCES coaches(id) ON DELETE CASCADE
 );
+
+CREATE TABLE discount_rules(
+     id INT AUTO_INCREMENT PRIMARY KEY,
+     visits_threshold INT NOT NULL UNIQUE, 
+     discount_percent INT NOT NULL
+    );
 
 

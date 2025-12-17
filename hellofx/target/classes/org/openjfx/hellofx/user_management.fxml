@@ -42,12 +42,14 @@
                     <Label fx:id="coachNameLabel" text="Coach name:" GridPane.rowIndex="4" GridPane.columnIndex="0" visible="false" managed="false" />
                     <TextField fx:id="coachNameField" promptText="Coach full name" GridPane.rowIndex="4" GridPane.columnIndex="1" visible="false" managed="false" />
 
-                    <Label fx:id="coachEmailLabel" text="Coach email (optional):" GridPane.rowIndex="5" GridPane.columnIndex="0" visible="false" managed="false" />
+                    <Label fx:id="coachEmailLabel" text="Coach email:" GridPane.rowIndex="5" GridPane.columnIndex="0" visible="false" managed="false" />
                     <TextField fx:id="coachEmailField" promptText="email" GridPane.rowIndex="5" GridPane.columnIndex="1" visible="false" managed="false" />
 
                     <Label fx:id="coachPhoneLabel" text="Coach phone:" GridPane.rowIndex="6" GridPane.columnIndex="0" visible="false" managed="false" />
                     <TextField fx:id="coachPhoneField" promptText="phone" GridPane.rowIndex="6" GridPane.columnIndex="1" visible="false" managed="false" />
                     <Label fx:id="coachNoteLabel" text="Coach default password = phone number" style="-fx-text-fill: #666; -fx-font-size: 11px;" GridPane.rowIndex="7" GridPane.columnIndex="1" visible="false" managed="false" />
+                    <Label fx:id="coachSpecializationsLabel" text="Specializations (optional):" GridPane.rowIndex="8" GridPane.columnIndex="0" visible="false" managed="false" />
+                    <TextField fx:id="coachSpecializationsField" promptText="e.g. Yoga, HIIT" GridPane.rowIndex="8" GridPane.columnIndex="1" visible="false" managed="false" />
                 </children>
             </GridPane>
             <Button text="Create user" onAction="#onCreateUser" maxWidth="160" />

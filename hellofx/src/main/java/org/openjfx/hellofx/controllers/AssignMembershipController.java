@@ -1,12 +1,23 @@
 package org.openjfx.hellofx.controllers;
 
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import org.openjfx.hellofx.dao.MembershipDAO;
-import org.openjfx.hellofx.entities.Membership;
-
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Optional;
+
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.DiscountRuleDAO;
+import org.openjfx.hellofx.dao.MembershipDAO;
+import org.openjfx.hellofx.dao.VisitDAO;
+import org.openjfx.hellofx.entities.DiscountRule;
+import org.openjfx.hellofx.entities.Membership;
+
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 public class AssignMembershipController {
 
@@ -41,10 +52,23 @@ public class AssignMembershipController {
             return;
         }
 
+        DiscountRuleDAO discountRuleDAO = DaoFactory.discountRules();
+        VisitDAO visitDao = DaoFactory.visits();
+
+        int visitCount = visitDao.countVisitsForClient(clientId);
+
         double priceVal = 0.0;
+        Optional<DiscountRule> bestDiscount = discountRuleDAO.bestRuleForVisits(visitCount);
+        int appliedPercent = 0;
+        double basePrice = 0.0;
         try {
             if (price != null && !price.isBlank()) {
                 priceVal = Double.parseDouble(price);
+                basePrice = priceVal;
+                if (bestDiscount.isPresent()) {
+                    appliedPercent = bestDiscount.get().getDiscountPercent();
+                    priceVal = priceVal * (100 - appliedPercent) / 100.0;
+                }
             }
         } catch (NumberFormatException e) {
             showAlert("Invalid price. Enter a valid number.");
@@ -55,7 +79,7 @@ public class AssignMembershipController {
         LocalDate expires;
         Membership.MembershipType enumType;
 
-         if ("10 Visits".equals(type)) {
+         if ("Ten".equalsIgnoreCase(type) || "10 Visits".equalsIgnoreCase(type)) {
              enumType = Membership.MembershipType.Ten;
              // default expiry window for 10 visits
              expires = start.plusMonths(3);
@@ -74,13 +98,21 @@ public class AssignMembershipController {
             }
         }
 
-        // Persist membership
+      
         int visits = enumType == Membership.MembershipType.Ten ? 10 : 0;
         Membership membership = new Membership(null, start, expires, priceVal, enumType, clientId, visits);
-        MembershipDAO dao = new MembershipDAO();
+        MembershipDAO dao = DaoFactory.memberships();
         try {
             dao.addMembership(membership);
             System.out.println("Assigned " + type + " membership to client id " + clientId);
+            if (appliedPercent > 0) {
+                showInfo(
+                    "Discount applied: " + appliedPercent + "% off (visits so far: " + visitCount + ").\n" +
+                    "Original price: " + basePrice + " -> Final price: " + priceVal
+                );
+            } else {
+                showInfo("No discount rule matched. Visits so far: " + visitCount + ".");
+            }
             if (onSaved != null) {
                 onSaved.run();
             }
@@ -113,6 +145,13 @@ public class AssignMembershipController {
 
     private void showAlert(String msg) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
+
+    private void showInfo(String msg) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setHeaderText(null);
         alert.setContentText(msg);
         alert.showAndWait();

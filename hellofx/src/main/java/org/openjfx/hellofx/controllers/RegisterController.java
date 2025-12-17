@@ -1,16 +1,16 @@
 package org.openjfx.hellofx.controllers;
 
-import java.sql.*;
+import java.sql.SQLException;
 
+import org.openjfx.hellofx.dao.ClientDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.entities.Client;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-
-import org.openjfx.hellofx.dao.ClientDAO;
-import org.openjfx.hellofx.entities.Client;
 
 
 public class RegisterController {
@@ -20,7 +20,7 @@ public class RegisterController {
     @FXML private TextField phoneField;
     @FXML private Label statusLabel;
 
-      private final ClientDAO clientDAO = new ClientDAO();
+      private final ClientDAO clientDAO = DaoFactory.clients();
 
 
     @FXML
@@ -37,10 +37,7 @@ public class RegisterController {
             showAlert(Alert.AlertType.WARNING, "Enter a valid email address.");
             return;
         }
-        if (!phone.matches("\\d{6,8}")) {
-            showAlert(Alert.AlertType.WARNING, "Phone must be 6, 7, or 8 digits.");
-            return;
-        }
+        
 
         Client client = new Client(null, name, email, phone);
         
@@ -66,6 +63,7 @@ public class RegisterController {
     }
 
     private boolean isValidEmail(String email) {
-        return email.matches("^[\\w.!#$%&'*+/=?`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+        // regex was taken from https://www.baeldung.com/java-email-validation-regex
+        return email.matches("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
     }
 }

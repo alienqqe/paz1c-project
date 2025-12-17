@@ -36,7 +36,7 @@
             <Insets top="20.0" />
          </VBox.margin>
       </HBox>
-      <Label fx:id="searchStatus" text="No users found">
+      <Label fx:id="searchStatus" text="">
          <VBox.margin>
             <Insets top="16.0" />
          </VBox.margin>
@@ -74,7 +74,9 @@
                <Button fx:id="visitHistoryButton" mnemonicParsing="false" onAction="#onOpenVisitHistory" text="Visit history" />
                <Button fx:id="manageUsersButton" mnemonicParsing="false" onAction="#onManageUsers" text="Manage users (admin)" />
                <Button fx:id="availabilityButton" mnemonicParsing="false" onAction="#onAddAvailability" text="Add availability (coach)" />
+               <Button fx:id="coachProfileButton" mnemonicParsing="false" onAction="#onCoachProfile" text="My profile" />
                <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#onLogout" text="Logout" />
+               <Button fx:id="discountButton" mnemonicParsing="false" onAction="#onDiscount" text="Manage discounts" />
             </children>
          </HBox>
          <VBox.margin>

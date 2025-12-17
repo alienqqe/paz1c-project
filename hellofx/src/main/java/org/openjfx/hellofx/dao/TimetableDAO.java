@@ -1,20 +1,31 @@
 package org.openjfx.hellofx.dao;
 
+import org.openjfx.hellofx.model.WeeklySession;
 import org.openjfx.hellofx.utils.Database;
+import org.springframework.jdbc.core.RowMapper;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
-import org.openjfx.hellofx.model.WeeklySession;
-
 public class TimetableDAO {
+
+    private final RowMapper<WeeklySession> mapper = (rs, rowNum) -> {
+        LocalDateTime startDt = rs.getTimestamp("startDate").toLocalDateTime();
+        LocalDateTime endDt = rs.getTimestamp("endDate").toLocalDateTime();
+        return new WeeklySession(
+            rs.getLong("id"),
+            rs.getString("coach_name"),
+            rs.getString("client_name"),
+            startDt.toLocalDate().getDayOfWeek(),
+            startDt.toLocalTime(),
+            endDt.toLocalTime(),
+            rs.getString("title")
+        );
+    };
+
     public List<WeeklySession> getWeeklySessions(LocalDate weekStart) throws SQLException {
         LocalDate weekEnd = weekStart.plusDays(7);
         String sql = """
@@ -30,31 +41,14 @@ public class TimetableDAO {
             WHERE ts.startDate >= ? AND ts.startDate < ?
             ORDER BY coach_name, startDate
                 """;
-
-            List<WeeklySession> results = new ArrayList<>();
-
-            try (Connection conn = Database.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-                stmt.setTimestamp(1, Timestamp.valueOf(weekStart.atStartOfDay()));
-                stmt.setTimestamp(2, Timestamp.valueOf(weekEnd.atStartOfDay()));
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    LocalDateTime startDt = rs.getTimestamp("startDate").toLocalDateTime();
-                    LocalDateTime endDt = rs.getTimestamp("endDate").toLocalDateTime();
-                    results.add(new WeeklySession(
-                        rs.getLong("id"),
-                        rs.getString("coach_name"),
-                        rs.getString("client_name"),
-                        startDt.toLocalDate().getDayOfWeek(),
-                        startDt.toLocalTime(),
-                        endDt.toLocalTime(),
-                        rs.getString("title")
-                    ));
-                }
-            }
-        return results;
-            }
+        return Database.jdbc().query(
+            sql,
+            ps -> {
+                ps.setTimestamp(1, Timestamp.valueOf(weekStart.atStartOfDay()));
+                ps.setTimestamp(2, Timestamp.valueOf(weekEnd.atStartOfDay()));
+            },
+            mapper
+        );
     }
 
     public void addTrainingSession(Long clientId, Long coachId, LocalDateTime start, LocalDateTime end, String title) throws SQLException {
@@ -63,24 +57,18 @@ public class TimetableDAO {
             VALUES (?, ?, ?, ?, ?)
         """;
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, clientId);
-            stmt.setLong(2, coachId);
-            stmt.setTimestamp(3, Timestamp.valueOf(start));
-            stmt.setTimestamp(4, Timestamp.valueOf(end));
-            stmt.setString(5, title);
-            stmt.executeUpdate();
-        }
+        Database.jdbc().update(sql, ps -> {
+            ps.setLong(1, clientId);
+            ps.setLong(2, coachId);
+            ps.setTimestamp(3, Timestamp.valueOf(start));
+            ps.setTimestamp(4, Timestamp.valueOf(end));
+            ps.setString(5, title);
+        });
     }
 
     public void deleteTrainingSession(Long id) throws SQLException {
         String sql = "DELETE FROM training_sessions WHERE id = ?";
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            stmt.executeUpdate();
-        }
+        Database.jdbc().update(sql, id);
     }
 
     /**
@@ -94,17 +82,13 @@ public class TimetableDAO {
               AND NOT (endDate <= ? OR startDate >= ?)
         """;
 
-        try (Connection conn = Database.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setLong(1, coachId);
-            stmt.setTimestamp(2, Timestamp.valueOf(start));
-            stmt.setTimestamp(3, Timestamp.valueOf(end));
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong("cnt") > 0;
-                }
-            }
-        }
-        return false;
+        Long count = Database.jdbc().queryForObject(
+            sql,
+            Long.class,
+            coachId,
+            Timestamp.valueOf(start),
+            Timestamp.valueOf(end)
+        );
+        return count != null && count > 0;
     }
 }

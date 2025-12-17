@@ -5,6 +5,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.model.WeeklySession;
 
@@ -26,7 +27,7 @@ public class WeeklyScheduleController {
     @FXML private TableColumn<WeeklySession, String> titleCol;
     @FXML private TableColumn<WeeklySession, String> actionCol;
 
-    private final TimetableDAO coachDao = new TimetableDAO();
+    private final TimetableDAO coachDao = DaoFactory.timetable();
 
     @FXML
     public void initialize() {
