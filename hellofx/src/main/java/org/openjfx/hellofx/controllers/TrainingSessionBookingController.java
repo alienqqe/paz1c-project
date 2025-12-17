@@ -5,10 +5,12 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.openjfx.hellofx.dao.ClientDAO;
@@ -78,7 +80,7 @@ public class TrainingSessionBookingController implements Initializable {
             LocalDateTime start = date.atTime(chosenStart);
             LocalDateTime end = date.atTime(chosenEnd);
 
-            if (end.isBefore(LocalDateTime.now())) {
+            if (start.isBefore(LocalDateTime.now())) {
                 showAlert(Alert.AlertType.WARNING, get("booking.error.past"));
                 return;
             }
@@ -122,11 +124,18 @@ public class TrainingSessionBookingController implements Initializable {
     void onLoadSlots(ActionEvent event) {
         statusLabel.setText("");
         slotsList.getItems().clear();
+        updateSlotsVisibility();
 
         String coachName = coachNameField.getText().trim();
         LocalDate date = datePicker.getValue();
         if (coachName.isEmpty() || date == null) {
             statusLabel.setText(get("booking.status.enter"));
+            return;
+        }
+        if (date.isBefore(LocalDate.now())) {
+            statusLabel.setText(get("booking.error.past"));
+            slotsList.getItems().clear();
+            updateSlotsVisibility();
             return;
         }
 
@@ -136,8 +145,11 @@ public class TrainingSessionBookingController implements Initializable {
             List<AvailabilitySlot> slots = availabilityDAO.getAvailabilityForDate(coachId, date);
             if (slots.isEmpty()) {
                 statusLabel.setText(get("booking.status.none"));
+                slotsList.getItems().clear();
+                updateSlotsVisibility();
             } else {
                 slotsList.getItems().setAll(slots);
+                updateSlotsVisibility();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -167,6 +179,22 @@ public class TrainingSessionBookingController implements Initializable {
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        if (datePicker != null) {
+            datePicker.setDayCellFactory(picker -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        return;
+                    }
+                    if (item.isBefore(LocalDate.now())) {
+                        setDisable(true);
+                    }
+                }
+            });
+        }
+        slotsList.getItems().addListener((ListChangeListener<AvailabilitySlot>) change -> updateSlotsVisibility());
+        updateSlotsVisibility();
         slotsList.setCellFactory(lv -> new ListCell<>() {
             @Override
             protected void updateItem(AvailabilitySlot item, boolean empty) {
@@ -299,5 +327,12 @@ public class TrainingSessionBookingController implements Initializable {
 
     private String get(String key) {
         return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
+    }
+
+    private void updateSlotsVisibility() {
+        if (slotsList == null) return;
+        boolean hasItems = !slotsList.getItems().isEmpty();
+        slotsList.setVisible(hasItems);
+        slotsList.setManaged(hasItems);
     }
 }

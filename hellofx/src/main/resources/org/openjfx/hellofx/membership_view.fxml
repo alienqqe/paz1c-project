@@ -5,90 +5,95 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<VBox alignment="TOP_CENTER" spacing="14.0" prefHeight="400.0" prefWidth="680.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.MembershipController">
-   <padding>
-      <Insets top="16.0" right="18.0" bottom="16.0" left="18.0" />
-   </padding>
-   <children>
-      <HBox alignment="CENTER_RIGHT" spacing="6.0" prefWidth="Infinity">
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.MembershipController">
+   <content>
+      <VBox alignment="TOP_CENTER" spacing="14.0" fillWidth="true">
+         <padding>
+            <Insets top="16.0" right="18.0" bottom="16.0" left="18.0" />
+         </padding>
          <children>
-            <Label text="%lang.label" />
-            <ComboBox fx:id="languageCombo" prefWidth="150.0" />
-         </children>
-      </HBox>
-      <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" text="%membership.title" textAlignment="CENTER">
-         <font>
-            <Font name="System Bold" size="18.0" />
-         </font>
-         <VBox.margin>
-            <Insets top="10.0" />
-         </VBox.margin>
-      </Text>
-      <HBox fx:id="searchContainer" alignment="CENTER" spacing="10">
-         <children>
-            <TextField fx:id="searchField" promptText="%membership.search.prompt" prefWidth="320">
+            <HBox alignment="CENTER_RIGHT" spacing="6.0" prefWidth="Infinity">
+               <children>
+                  <Label text="%lang.label" />
+                  <ComboBox fx:id="languageCombo" prefWidth="150.0" />
+               </children>
+            </HBox>
+            <Text fx:id="titleText" strokeType="OUTSIDE" strokeWidth="0.0" text="%membership.title" textAlignment="CENTER">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+            </Text>
+            <HBox fx:id="searchContainer" alignment="CENTER" spacing="10">
+               <children>
+                  <TextField fx:id="searchField" promptText="%membership.search.prompt" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+                     <opaqueInsets>
+                        <Insets />
+                     </opaqueInsets>
+                  </TextField>
+                  <Button fx:id="searchButton" alignment="CENTER" mnemonicParsing="false" onAction="#onSearchButton" text="%membership.search.button" />
+               </children>
+               <VBox.margin>
+                  <Insets top="20.0" />
+               </VBox.margin>
+            </HBox>
+            <Label fx:id="searchStatus" text="">
+               <VBox.margin>
+                  <Insets top="16.0" />
+               </VBox.margin>
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <VBox fx:id="resultsBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" visible="false" VBox.vgrow="ALWAYS">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>
-            </TextField>
-            <Button fx:id="searchButton" alignment="CENTER" mnemonicParsing="false" onAction="#onSearchButton" text="%membership.search.button" />
-         </children>
-         <VBox.margin>
-            <Insets top="20.0" />
-         </VBox.margin>
-      </HBox>
-      <Label fx:id="searchStatus" text="">
-         <VBox.margin>
-            <Insets top="16.0" />
-         </VBox.margin>
-         <font>
-            <Font name="System Bold" size="18.0" />
-         </font>
-      </Label>
-      <VBox fx:id="resultsBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" visible="false">
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-         <VBox.margin>
-            <Insets top="10.0" />
-         </VBox.margin>
-         <children>
-            <Label text="%membership.search.results">
-               <font>
-                  <Font size="14.0" />
-               </font>
-            </Label>
-            <ListView fx:id="resultsList" />
+               <VBox.margin>
+                  <Insets top="10.0" />
+               </VBox.margin>
+               <children>
+                  <Label text="%membership.search.results">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                  </Label>
+                  <ListView fx:id="resultsList" VBox.vgrow="ALWAYS" maxWidth="Infinity" />
+               </children>
+            </VBox>
+            <VBox alignment="CENTER" spacing="12.0">
+               <HBox fx:id="actionsRow1" alignment="CENTER" spacing="10">
+                  <children>
+                     <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegisterNewClient" text="%membership.registerClient" />
+                     <Button fx:id="searchCoachButton" mnemonicParsing="false" onAction="#onSearchCoach" text="%membership.searchCoaches" />
+                     <Button fx:id="weeklyScheduleButton" mnemonicParsing="false" onAction="#onOpenWeeklySchedule" text="%membership.weeklySchedule" />
+                  </children>
+               </HBox>
+               <HBox fx:id="actionsRow2" alignment="CENTER" spacing="10">
+                  <children>
+                     <Button fx:id="bookSessionButton" mnemonicParsing="false" onAction="#onBookTrainingSession" text="%membership.bookSession" />
+                     <Button fx:id="visitHistoryButton" mnemonicParsing="false" onAction="#onOpenVisitHistory" text="%membership.visitHistory" />
+                     <Button fx:id="manageUsersButton" mnemonicParsing="false" onAction="#onManageUsers" text="%membership.manageUsers" />
+                     <Button fx:id="availabilityButton" mnemonicParsing="false" onAction="#onAddAvailability" text="%membership.addAvailability" />
+                     <Button fx:id="coachProfileButton" mnemonicParsing="false" onAction="#onCoachProfile" text="%membership.profile" />
+                     <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#onLogout" text="%membership.logout" />
+                     <Button fx:id="discountButton" mnemonicParsing="false" onAction="#onDiscount" text="%membership.manageDiscounts" />
+                  </children>
+               </HBox>
+               <VBox.margin>
+                  <Insets top="24.0" />
+               </VBox.margin>
+            </VBox>
          </children>
       </VBox>
-      <VBox alignment="CENTER" spacing="12.0">
-         <HBox fx:id="actionsRow1" alignment="CENTER" spacing="10">
-            <children>
-               <Button fx:id="registerButton" mnemonicParsing="false" onAction="#onRegisterNewClient" text="%membership.registerClient" />
-               <Button fx:id="searchCoachButton" mnemonicParsing="false" onAction="#onSearchCoach" text="%membership.searchCoaches" />
-               <Button fx:id="weeklyScheduleButton" mnemonicParsing="false" onAction="#onOpenWeeklySchedule" text="%membership.weeklySchedule" />
-            </children>
-         </HBox>
-         <HBox fx:id="actionsRow2" alignment="CENTER" spacing="10">
-            <children>
-               <Button fx:id="bookSessionButton" mnemonicParsing="false" onAction="#onBookTrainingSession" text="%membership.bookSession" />
-               <Button fx:id="visitHistoryButton" mnemonicParsing="false" onAction="#onOpenVisitHistory" text="%membership.visitHistory" />
-               <Button fx:id="manageUsersButton" mnemonicParsing="false" onAction="#onManageUsers" text="%membership.manageUsers" />
-               <Button fx:id="availabilityButton" mnemonicParsing="false" onAction="#onAddAvailability" text="%membership.addAvailability" />
-               <Button fx:id="coachProfileButton" mnemonicParsing="false" onAction="#onCoachProfile" text="%membership.profile" />
-               <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#onLogout" text="%membership.logout" />
-               <Button fx:id="discountButton" mnemonicParsing="false" onAction="#onDiscount" text="%membership.manageDiscounts" />
-            </children>
-         </HBox>
-         <VBox.margin>
-            <Insets top="24.0" />
-         </VBox.margin>
-      </VBox>
-   </children>
-</VBox>
+   </content>
+</ScrollPane>

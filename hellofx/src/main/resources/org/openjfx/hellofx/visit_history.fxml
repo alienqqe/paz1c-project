@@ -4,32 +4,37 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.openjfx.hellofx.controllers.VisitHistoryController">
-    <top>
-        <HBox spacing="8.0" alignment="CENTER_LEFT">
-            <padding>
-                <Insets top="10" right="10" bottom="10" left="10"/>
-            </padding>
-            <children>
-                <TextField fx:id="searchField" promptText="%visit.filterPrompt" prefWidth="240"/>
-                <Button text="%visit.search" onAction="#onSearch"/>
-                <Button text="%visit.clear" onAction="#onClear"/>
-            </children>
-        </HBox>
-    </top>
-    <center>
-        <TableView fx:id="table">
-            <columns>
-                <TableColumn fx:id="clientCol" text="%visit.col.client"/>
-                <TableColumn fx:id="emailCol" text="%visit.col.email"/>
-                <TableColumn fx:id="membershipCol" text="%visit.col.membership"/>
-                <TableColumn fx:id="checkInCol" text="%visit.col.checkin"/>
-            </columns>
-        </TableView>
-    </center>
-</BorderPane>
+    <content>
+        <BorderPane>
+            <top>
+                <HBox spacing="8.0" alignment="CENTER_LEFT">
+                    <padding>
+                        <Insets top="10" right="10" bottom="10" left="10"/>
+                    </padding>
+                    <children>
+                        <TextField fx:id="searchField" promptText="%visit.filterPrompt" prefWidth="240" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                        <Button text="%visit.search" onAction="#onSearch"/>
+                        <Button text="%visit.clear" onAction="#onClear"/>
+                    </children>
+                </HBox>
+            </top>
+            <center>
+                <TableView fx:id="table">
+                    <columns>
+                        <TableColumn fx:id="clientCol" text="%visit.col.client"/>
+                        <TableColumn fx:id="emailCol" text="%visit.col.email"/>
+                        <TableColumn fx:id="membershipCol" text="%visit.col.membership"/>
+                        <TableColumn fx:id="checkInCol" text="%visit.col.checkin"/>
+                    </columns>
+                </TableView>
+            </center>
+        </BorderPane>
+    </content>
+</ScrollPane>

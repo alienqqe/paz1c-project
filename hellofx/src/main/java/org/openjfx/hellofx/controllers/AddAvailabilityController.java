@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -35,6 +36,20 @@ public class AddAvailabilityController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        if (datePicker != null) {
+            datePicker.setDayCellFactory(picker -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        return;
+                    }
+                    if (item.isBefore(LocalDate.now())) {
+                        setDisable(true);
+                    }
+                }
+            });
+        }
     }
 
     @FXML
@@ -66,6 +81,10 @@ public class AddAvailabilityController implements Initializable {
             showAlert(Alert.AlertType.WARNING, get("availability.error.fill"));
             return;
         }
+        if (date.isBefore(LocalDate.now())) {
+            showAlert(Alert.AlertType.WARNING, get("availability.error.pastDate"));
+            return;
+        }
 
         try {
             LocalTime startTime = LocalTime.parse(startText);
@@ -73,6 +92,10 @@ public class AddAvailabilityController implements Initializable {
             LocalDateTime start = date.atTime(startTime);
             LocalDateTime end = date.atTime(endTime);
 
+            if (start.isBefore(LocalDateTime.now())) {
+                showAlert(Alert.AlertType.WARNING, get("availability.error.pastDate"));
+                return;
+            }
             if (!end.isAfter(start)) {
                 showAlert(Alert.AlertType.WARNING, get("availability.error.endAfter"));
                 return;
