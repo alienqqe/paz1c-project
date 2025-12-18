@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -12,72 +13,76 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.UserManagementController" spacing="14.0">
-    <padding>
-        <Insets top="18" right="18" bottom="18" left="18"/>
-    </padding>
-    <children>
-        <Label text="%um.title" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.UserManagementController">
+    <content>
+        <VBox spacing="14.0">
+            <padding>
+                <Insets top="18" right="18" bottom="18" left="18"/>
+            </padding>
+            <children>
+                <Label text="%um.title" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
 
-        <VBox spacing="8">
-            <Label text="%um.createUser" style="-fx-font-weight: bold;" />
-            <GridPane hgap="10" vgap="8">
-                <columnConstraints>
-                    <ColumnConstraints halignment="RIGHT" minWidth="120" />
-                    <ColumnConstraints minWidth="200" />
-                </columnConstraints>
-                <children>
-                    <Label fx:id="usernameLabel" text="%um.username" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-                    <TextField fx:id="newUsernameField" promptText="%um.username" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+                <VBox spacing="8">
+                    <Label text="%um.createUser" style="-fx-font-weight: bold;" />
+                    <GridPane hgap="10" vgap="8">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="35" halignment="RIGHT" />
+                            <ColumnConstraints percentWidth="65" hgrow="ALWAYS" />
+                        </columnConstraints>
+                        <children>
+                            <Label fx:id="usernameLabel" text="%um.username" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                            <TextField fx:id="newUsernameField" promptText="%um.username" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                    <Label fx:id="passwordLabel" text="%um.password" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-                    <PasswordField fx:id="newPasswordField" promptText="%um.password" GridPane.rowIndex="1" GridPane.columnIndex="1" />
+                            <Label fx:id="passwordLabel" text="%um.password" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                            <PasswordField fx:id="newPasswordField" promptText="%um.password" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                    <Label fx:id="confirmLabel" text="%um.confirm" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-                    <PasswordField fx:id="newPasswordConfirmField" promptText="%um.confirm" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+                            <Label fx:id="confirmLabel" text="%um.confirm" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                            <PasswordField fx:id="newPasswordConfirmField" promptText="%um.confirm" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                    <Label text="%um.role" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-                    <ChoiceBox fx:id="roleChoice" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+                            <Label text="%um.role" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                            <ChoiceBox fx:id="roleChoice" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                    <Label fx:id="coachNameLabel" text="%um.coachName" GridPane.rowIndex="4" GridPane.columnIndex="0" visible="false" managed="false" />
-                    <TextField fx:id="coachNameField" promptText="%um.coachName" GridPane.rowIndex="4" GridPane.columnIndex="1" visible="false" managed="false" />
+                            <Label fx:id="coachNameLabel" text="%um.coachName" GridPane.rowIndex="4" GridPane.columnIndex="0" visible="false" managed="false" />
+                            <TextField fx:id="coachNameField" promptText="%um.coachName" GridPane.rowIndex="4" GridPane.columnIndex="1" visible="false" managed="false" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                    <Label fx:id="coachEmailLabel" text="%um.coachEmail" GridPane.rowIndex="5" GridPane.columnIndex="0" visible="false" managed="false" />
-                    <TextField fx:id="coachEmailField" promptText="%um.coachEmail" GridPane.rowIndex="5" GridPane.columnIndex="1" visible="false" managed="false" />
+                            <Label fx:id="coachEmailLabel" text="%um.coachEmail" GridPane.rowIndex="5" GridPane.columnIndex="0" visible="false" managed="false" />
+                            <TextField fx:id="coachEmailField" promptText="%um.coachEmail" GridPane.rowIndex="5" GridPane.columnIndex="1" visible="false" managed="false" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                    <Label fx:id="coachPhoneLabel" text="%um.coachPhone" GridPane.rowIndex="6" GridPane.columnIndex="0" visible="false" managed="false" />
-                    <TextField fx:id="coachPhoneField" promptText="%um.coachPhone" GridPane.rowIndex="6" GridPane.columnIndex="1" visible="false" managed="false" />
-                    <Label fx:id="coachNoteLabel" text="%um.coachNote" style="-fx-text-fill: #666; -fx-font-size: 11px;" GridPane.rowIndex="7" GridPane.columnIndex="1" visible="false" managed="false" />
-                    <Label fx:id="coachSpecializationsLabel" text="%um.coachSpecs" GridPane.rowIndex="8" GridPane.columnIndex="0" visible="false" managed="false" />
-                    <TextField fx:id="coachSpecializationsField" promptText="%um.coachSpecs" GridPane.rowIndex="8" GridPane.columnIndex="1" visible="false" managed="false" />
-                </children>
-            </GridPane>
-            <Button text="%um.createButton" onAction="#onCreateUser" maxWidth="160" />
-            <Label fx:id="createStatus" textFill="red" wrapText="true" />
+                            <Label fx:id="coachPhoneLabel" text="%um.coachPhone" GridPane.rowIndex="6" GridPane.columnIndex="0" visible="false" managed="false" />
+                            <TextField fx:id="coachPhoneField" promptText="%um.coachPhone" GridPane.rowIndex="6" GridPane.columnIndex="1" visible="false" managed="false" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+                            <Label fx:id="coachNoteLabel" text="%um.coachNote" style="-fx-text-fill: #666; -fx-font-size: 11px;" GridPane.rowIndex="7" GridPane.columnIndex="1" visible="false" managed="false" />
+                            <Label fx:id="coachSpecializationsLabel" text="%um.coachSpecs" GridPane.rowIndex="8" GridPane.columnIndex="0" visible="false" managed="false" />
+                            <TextField fx:id="coachSpecializationsField" promptText="%um.coachSpecs" GridPane.rowIndex="8" GridPane.columnIndex="1" visible="false" managed="false" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+                        </children>
+                    </GridPane>
+                    <Button text="%um.createButton" onAction="#onCreateUser" maxWidth="160" />
+                    <Label fx:id="createStatus" textFill="red" wrapText="true" />
+                </VBox>
+
+                <VBox spacing="8">
+                    <Label text="%um.changePassword" style="-fx-font-weight: bold;" />
+                    <GridPane hgap="10" vgap="8">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="35" halignment="RIGHT" />
+                            <ColumnConstraints percentWidth="65" hgrow="ALWAYS" />
+                        </columnConstraints>
+                        <children>
+                            <Label text="%um.currentPassword" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                            <PasswordField fx:id="currentPasswordField" promptText="%um.currentPassword" GridPane.rowIndex="0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+
+                            <Label text="%um.newPassword" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                            <PasswordField fx:id="newSelfPasswordField" promptText="%um.newPassword" GridPane.rowIndex="1" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+
+                            <Label text="%um.confirmNew" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                            <PasswordField fx:id="confirmSelfPasswordField" promptText="%um.confirmNew" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+                        </children>
+                    </GridPane>
+                    <HBox spacing="10">
+                        <Button text="%um.changeButton" onAction="#onChangePassword" />
+                        <Label fx:id="changeStatus" textFill="red" wrapText="true" />
+                    </HBox>
+                </VBox>
+            </children>
         </VBox>
-
-        <VBox spacing="8">
-            <Label text="%um.changePassword" style="-fx-font-weight: bold;" />
-            <GridPane hgap="10" vgap="8">
-                <columnConstraints>
-                    <ColumnConstraints halignment="RIGHT" minWidth="120" />
-                    <ColumnConstraints minWidth="200" />
-                </columnConstraints>
-                <children>
-                    <Label text="%um.currentPassword" GridPane.rowIndex="0" GridPane.columnIndex="0" />
-                    <PasswordField fx:id="currentPasswordField" promptText="%um.currentPassword" GridPane.rowIndex="0" GridPane.columnIndex="1" />
-
-                    <Label text="%um.newPassword" GridPane.rowIndex="1" GridPane.columnIndex="0" />
-                    <PasswordField fx:id="newSelfPasswordField" promptText="%um.newPassword" GridPane.rowIndex="1" GridPane.columnIndex="1" />
-
-                    <Label text="%um.confirmNew" GridPane.rowIndex="2" GridPane.columnIndex="0" />
-                    <PasswordField fx:id="confirmSelfPasswordField" promptText="%um.confirmNew" GridPane.rowIndex="2" GridPane.columnIndex="1" />
-                </children>
-            </GridPane>
-            <HBox spacing="10">
-                <Button text="%um.changeButton" onAction="#onChangePassword" />
-                <Label fx:id="changeStatus" textFill="red" wrapText="true" />
-            </HBox>
-        </VBox>
-    </children>
-</VBox>
+    </content>
+</ScrollPane>

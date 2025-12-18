@@ -5,26 +5,31 @@
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="12.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.LoginController" prefHeight="320.0" prefWidth="380.0">
-   <padding>
-      <Insets top="20.0" right="24.0" bottom="20.0" left="24.0" />
-   </padding>
-   <children>
-      <HBox alignment="CENTER_RIGHT" spacing="6.0" prefWidth="Infinity">
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.LoginController">
+   <content>
+      <VBox alignment="CENTER" spacing="12.0" fillWidth="true">
+         <padding>
+            <Insets top="20.0" right="24.0" bottom="20.0" left="24.0" />
+         </padding>
          <children>
-            <Label text="%lang.label" />
-            <ComboBox fx:id="languageCombo" prefWidth="140.0" />
+            <HBox alignment="CENTER_RIGHT" spacing="6.0" prefWidth="Infinity">
+               <children>
+                  <Label text="%lang.label" />
+                  <ComboBox fx:id="languageCombo" prefWidth="140.0" />
+               </children>
+            </HBox>
+            <Label text="%login.title" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+            <TextField fx:id="usernameField" promptText="%login.username" maxWidth="Infinity" />
+            <PasswordField fx:id="passwordField" promptText="%login.password" maxWidth="Infinity" />
+            <Button mnemonicParsing="false" onAction="#onLogin" text="%login.button" maxWidth="Infinity" />
+            <Label fx:id="statusLabel" textFill="red" wrapText="true" />
+            <Label text="%login.defaultAdmin" style="-fx-text-fill: #666; -fx-font-size: 11px;" />
          </children>
-      </HBox>
-   <Label text="%login.title" style="-fx-font-size: 18px; -fx-font-weight: bold;" />
-   <TextField fx:id="usernameField" promptText="%login.username" />
-   <PasswordField fx:id="passwordField" promptText="%login.password" />
-   <Button mnemonicParsing="false" onAction="#onLogin" text="%login.button" maxWidth="Infinity" />
-   <Label fx:id="statusLabel" textFill="red" wrapText="true" />
-   <Label text="%login.defaultAdmin" style="-fx-text-fill: #666; -fx-font-size: 11px;" />
-   </children>
-</VBox>
+      </VBox>
+   </content>
+</ScrollPane>

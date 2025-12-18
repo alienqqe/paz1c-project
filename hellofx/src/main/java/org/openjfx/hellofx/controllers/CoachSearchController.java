@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -31,16 +32,20 @@ public class CoachSearchController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        if (resultsList != null) {
+            resultsList.getItems().addListener((ListChangeListener<HBox>) change -> updateResultsVisibility());
+            updateResultsVisibility();
+        }
     }
 
     @FXML
     void onSearchButton(ActionEvent event) {
         String query = searchField.getText().trim();
         resultsList.getItems().clear();
+        updateResultsVisibility();
 
         if (query.isEmpty()) {
             searchStatus.setText(get("coachSearch.status.enter"));
-            resultsBox.setVisible(false);
             return;
         }
 
@@ -48,14 +53,13 @@ public class CoachSearchController implements Initializable {
             List<Coach> found = coachDAO.searchCoaches(query);
             if (found.isEmpty()) {
                 searchStatus.setText(get("coachSearch.status.none"));
-                resultsBox.setVisible(false);
             } else {
                 searchStatus.setText(String.format(get("coachSearch.status.found"), found.size()));
-                resultsBox.setVisible(true);
                 for (Coach coach : found) {
                     HBox row = createCoachRow(coach);
                     resultsList.getItems().add(row);
                 }
+                updateResultsVisibility();
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -79,5 +83,14 @@ public class CoachSearchController implements Initializable {
 
     private String get(String key) {
         return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
+    }
+
+    private void updateResultsVisibility() {
+        if (resultsBox == null || resultsList == null) return;
+        boolean hasItems = !resultsList.getItems().isEmpty();
+        resultsBox.setVisible(hasItems);
+        resultsBox.setManaged(hasItems);
+        resultsList.setVisible(hasItems);
+        resultsList.setManaged(hasItems);
     }
 }

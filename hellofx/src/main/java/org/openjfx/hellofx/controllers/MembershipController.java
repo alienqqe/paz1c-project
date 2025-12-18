@@ -24,6 +24,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -106,13 +107,19 @@ public class MembershipController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
         setupLanguageSelector();
+        if (resultsList != null) {
+            resultsList.getItems().addListener((ListChangeListener<HBox>) change -> updateResultsVisibility());
+            updateResultsVisibility();
+        }
         if (manageUsersButton != null) {
             manageUsersButton.setDisable(!AuthContext.isAdmin());
             manageUsersButton.setVisible(AuthContext.isAdmin());
+            manageUsersButton.setManaged(AuthContext.isAdmin());
         }
         if (discountButton != null){
             discountButton.setDisable(!AuthContext.isAdmin());
             discountButton.setVisible(AuthContext.isAdmin());
+            discountButton.setManaged(AuthContext.isAdmin());
         }
 
         boolean isCoach = AuthContext.isCoach();
@@ -123,11 +130,13 @@ public class MembershipController implements Initializable {
         if (availabilityButton != null) {
             availabilityButton.setDisable(!isCoach);
             availabilityButton.setVisible(isCoach);
+            availabilityButton.setManaged(isCoach);
         }
         if (visitHistoryButton != null) {
             boolean canViewHistory = AuthContext.isAdmin() || !AuthContext.isCoach();
             visitHistoryButton.setDisable(!canViewHistory);
             visitHistoryButton.setVisible(canViewHistory);
+            visitHistoryButton.setManaged(canViewHistory);
         }
         if (titleText != null && isCoach) {
             titleText.setText(get("membership.title.coach"));
@@ -268,26 +277,25 @@ public class MembershipController implements Initializable {
     void onSearchButton(ActionEvent event) {
         String query = searchField.getText().trim();
         resultsList.getItems().clear();
+        updateResultsVisibility();
 
         if (query.isEmpty()) {
-                searchStatus.setText(get("membership.search.enter"));
-                resultsBox.setVisible(false);
-                return;
-            }
+            searchStatus.setText(get("membership.search.enter"));
+            return;
+        }
 
         try {
             List<Client> found = clientDAO.searchClients(query);
 
             if (found.isEmpty()) {
                 searchStatus.setText(get("membership.search.none"));
-                resultsBox.setVisible(false);
             } else {
                 searchStatus.setText(String.format(get("membership.search.found"), found.size()));
-                resultsBox.setVisible(true);
                 for (Client c : found) {
                     HBox row = createClientRow(c);
                     resultsList.getItems().add(row);
                 }
+                updateResultsVisibility();
             }
 
         } catch (SQLException e) {
@@ -611,5 +619,14 @@ public class MembershipController implements Initializable {
 
     private String get(String key) {
         return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
+    }
+
+    private void updateResultsVisibility() {
+        if (resultsBox == null || resultsList == null) return;
+        boolean hasItems = !resultsList.getItems().isEmpty();
+        resultsBox.setVisible(hasItems);
+        resultsBox.setManaged(hasItems);
+        resultsList.setVisible(hasItems);
+        resultsList.setManaged(hasItems);
     }
 }

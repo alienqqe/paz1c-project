@@ -18,6 +18,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -68,6 +69,20 @@ public class AssignMembershipController implements Initializable {
                 return null;
             }
         });
+        if (startDatePicker != null) {
+            startDatePicker.setDayCellFactory(picker -> new DateCell() {
+                @Override
+                public void updateItem(LocalDate item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty || item == null) {
+                        return;
+                    }
+                    if (item.isBefore(LocalDate.now())) {
+                        setDisable(true);
+                    }
+                }
+            });
+        }
     }
 
     @FXML
@@ -104,6 +119,10 @@ public class AssignMembershipController implements Initializable {
         }
 
         LocalDate start = (startDatePicker.getValue() != null) ? startDatePicker.getValue() : LocalDate.now();
+        if (start.isBefore(LocalDate.now())) {
+            showAlert(get("assign.error.startPast"));
+            return;
+        }
         LocalDate expires;
         if (enumType == Membership.MembershipType.Ten) {
             // default expiry window for 10 visits

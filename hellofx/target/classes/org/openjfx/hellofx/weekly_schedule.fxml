@@ -2,21 +2,26 @@
 
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.openjfx.hellofx.controllers.WeeklyScheduleController">
-    <center>
-        <TableView fx:id="table">
-            <columns>
-                <TableColumn fx:id="coachCol" text="%weekly.coach"/>
-                <TableColumn fx:id="clientCol" text="%weekly.client"/>
-                <TableColumn fx:id="dayCol" text="%weekly.day"/>
-                <TableColumn fx:id="startCol" text="%weekly.start"/>
-                <TableColumn fx:id="endCol" text="%weekly.end"/>
-                <TableColumn fx:id="titleCol" text="%weekly.title"/>
-                <TableColumn fx:id="actionCol" text="%weekly.actions"/>
-            </columns>
-        </TableView>
-    </center>
-</BorderPane>
+    <content>
+        <BorderPane>
+            <center>
+                <TableView fx:id="table">
+                    <columns>
+                        <TableColumn fx:id="coachCol" text="%weekly.coach"/>
+                        <TableColumn fx:id="clientCol" text="%weekly.client"/>
+                        <TableColumn fx:id="dayCol" text="%weekly.day"/>
+                        <TableColumn fx:id="startCol" text="%weekly.start"/>
+                        <TableColumn fx:id="endCol" text="%weekly.end"/>
+                        <TableColumn fx:id="titleCol" text="%weekly.title"/>
+                        <TableColumn fx:id="actionCol" text="%weekly.actions"/>
+                    </columns>
+                </TableView>
+            </center>
+        </BorderPane>
+    </content>
+</ScrollPane>
