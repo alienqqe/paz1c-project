@@ -1,9 +1,9 @@
 package org.openjfx.hellofx;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -21,6 +21,7 @@ public class App extends Application {
     private static Scene scene;
     private static Locale currentLocale = Locale.getDefault();
     private static String currentView = "login_view";
+    private static String currentTheme = "/org/openjfx/hellofx/styles.css";
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -33,6 +34,7 @@ public class App extends Application {
         }
 
         scene = new Scene(loadFXML("login_view"), 640, 480);
+        applyTheme(scene);
         stage.setScene(scene);
         stage.setTitle(getBundle().getString("app.title"));
         stage.show();
@@ -41,6 +43,7 @@ public class App extends Application {
     public static void setRoot(String fxml) throws IOException {
         currentView = fxml;
         scene.setRoot(loadFXML(fxml));
+        applyTheme(scene);
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
@@ -60,6 +63,25 @@ public class App extends Application {
 
     public static Locale getCurrentLocale() {
         return currentLocale;
+    }
+
+    public static String getCurrentTheme() {
+        return currentTheme;
+    }
+
+    public static void switchTheme(String themePath) {
+        if (themePath == null) return;
+        currentTheme = themePath;
+        applyTheme(scene);
+    }
+
+    public static void applyTheme(Scene target) {
+        if (target == null) return;
+        String css = App.class.getResource(currentTheme).toExternalForm();
+        target.getStylesheets().setAll(css);
+        if (target.getRoot() != null) {
+            target.getRoot().getStylesheets().setAll(css);
+        }
     }
 
     public static void switchLocale(Locale locale) throws IOException {

@@ -1,5 +1,15 @@
 package org.openjfx.hellofx.controllers;
 
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.VisitDAO;
+import org.openjfx.hellofx.dao.VisitDAO.VisitView;
+import org.openjfx.hellofx.model.VisitRow;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -10,15 +20,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.VisitDAO;
-import org.openjfx.hellofx.dao.VisitDAO.VisitView;
-import org.openjfx.hellofx.model.VisitRow;
-
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.ResourceBundle;
 
 public class VisitHistoryController implements Initializable {
 
@@ -35,6 +36,7 @@ public class VisitHistoryController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         clientCol.setCellValueFactory(cell ->
             new SimpleStringProperty(cell.getValue().clientName()));
         emailCol.setCellValueFactory(cell ->
@@ -44,6 +46,7 @@ public class VisitHistoryController implements Initializable {
         checkInCol.setCellValueFactory(cell ->
             new SimpleObjectProperty<>(cell.getValue().checkIn()));
         loadVisits(null);
+        
     }
 
     private void loadVisits(String filter) {

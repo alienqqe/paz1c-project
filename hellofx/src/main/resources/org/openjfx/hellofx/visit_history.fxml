@@ -8,11 +8,15 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.layout.BorderPane?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.openjfx.hellofx.controllers.VisitHistoryController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
     <content>
-        <BorderPane>
+        <BorderPane styleClass="root-pane">
             <top>
                 <HBox spacing="8.0" alignment="CENTER_LEFT">
                     <padding>
@@ -26,12 +30,12 @@
                 </HBox>
             </top>
             <center>
-                <TableView fx:id="table">
+                <TableView fx:id="table" styleClass = "custom-table">
                     <columns>
-                        <TableColumn fx:id="clientCol" text="%visit.col.client"/>
-                        <TableColumn fx:id="emailCol" text="%visit.col.email"/>
-                        <TableColumn fx:id="membershipCol" text="%visit.col.membership"/>
-                        <TableColumn fx:id="checkInCol" text="%visit.col.checkin"/>
+                        <TableColumn fx:id="clientCol" text="%visit.col.client" styleClass = "customColum" />
+                        <TableColumn fx:id="emailCol" text="%visit.col.email" styleClass = "customColum" />
+                        <TableColumn fx:id="membershipCol" text="%visit.col.membership" styleClass = "customColum" />
+                        <TableColumn fx:id="checkInCol" text="%visit.col.checkin" styleClass = "customColum"/>
                     </columns>
                 </TableView>
             </center>

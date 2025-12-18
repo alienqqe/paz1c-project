@@ -13,10 +13,12 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.AssignMembershipController">
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.AssignMembershipController">
+ 
    <content>
-      <VBox alignment="TOP_CENTER" spacing="10.0" fillWidth="true">
+      <VBox alignment="TOP_CENTER" spacing="10.0" fillWidth="true" styleClass="root-pane">
          <children>
             <Label text="%assign.title">
                <VBox.margin>

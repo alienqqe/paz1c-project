@@ -11,11 +11,15 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="org.openjfx.hellofx.controllers.TrainingSessionBookingController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
     <content>
-        <VBox spacing="10" alignment="CENTER">
+        <VBox spacing="10" alignment="CENTER" styleClass="root-pane">
             <padding>
                 <Insets top="15" right="15" bottom="15" left="15"/>
             </padding>
@@ -39,7 +43,7 @@
                     <TextField fx:id="coachNameField" promptText="%booking.coach.prompt" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity"/>
 
                     <Label text="%booking.date" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-                    <DatePicker fx:id="datePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity"/>
+                    <DatePicker fx:id="datePicker" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" styleClass="custom-datePicker"/>
                 </children>
             </GridPane>
 

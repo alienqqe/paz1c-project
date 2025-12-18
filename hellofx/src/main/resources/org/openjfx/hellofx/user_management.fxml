@@ -12,10 +12,14 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.UserManagementController">
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.UserManagementController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
     <content>
-        <VBox spacing="14.0">
+        <VBox spacing="14.0" styleClass="root-pane">
             <padding>
                 <Insets top="18" right="18" bottom="18" left="18"/>
             </padding>
@@ -39,8 +43,8 @@
                             <Label fx:id="confirmLabel" text="%um.confirm" GridPane.rowIndex="2" GridPane.columnIndex="0" />
                             <PasswordField fx:id="newPasswordConfirmField" promptText="%um.confirm" GridPane.rowIndex="2" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
 
-                            <Label text="%um.role" GridPane.rowIndex="3" GridPane.columnIndex="0" />
-                            <ChoiceBox fx:id="roleChoice" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />
+                            <Label text="%um.role" GridPane.rowIndex="3" GridPane.columnIndex="0"  />
+                            <ChoiceBox fx:id="roleChoice" GridPane.rowIndex="3" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" styleClass= "choice-box-custom" />
 
                             <Label fx:id="coachNameLabel" text="%um.coachName" GridPane.rowIndex="4" GridPane.columnIndex="0" visible="false" managed="false" />
                             <TextField fx:id="coachNameField" promptText="%um.coachName" GridPane.rowIndex="4" GridPane.columnIndex="1" visible="false" managed="false" GridPane.hgrow="ALWAYS" maxWidth="Infinity" />

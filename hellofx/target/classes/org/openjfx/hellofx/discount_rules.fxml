@@ -3,13 +3,17 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/17"
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.openjfx.hellofx.controllers.DiscountRulesController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
 
     <content>
-        <BorderPane>
+        <BorderPane styleClass="root-pane">
             <top>
                 <VBox spacing="6" BorderPane.alignment="CENTER_LEFT">
                     <padding>

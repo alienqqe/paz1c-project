@@ -7,11 +7,15 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import java.net.URL?>
 
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.RegisterController">
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.RegisterController">
+   <stylesheets>
+      <URL value="@styles.css" />
+   </stylesheets>
    <content>
-      <VBox alignment="CENTER" spacing="10.0" fillWidth="true">
+      <VBox alignment="CENTER" spacing="10.0" fillWidth="true" styleClass="root-pane">
          <children>
             <VBox alignment="CENTER" spacing="30.0">
                <children>
