@@ -53,7 +53,9 @@ public class App extends Application {
         if (bundle == null && !Locale.ENGLISH.equals(currentLocale)) {
             bundle = loadBundle(Locale.ENGLISH);
         }
-        return bundle == null ? ResourceBundle.getBundle("org.openjfx.hellofx.messages") : bundle;
+        return bundle == null
+                ? ResourceBundle.getBundle("org.openjfx.hellofx.messages", Locale.ENGLISH)
+                : bundle;
     }
 
     public static Locale getCurrentLocale() {
@@ -62,6 +64,8 @@ public class App extends Application {
 
     public static void switchLocale(Locale locale) throws IOException {
         if (locale == null) return;
+        // Clear cached bundles so the next load picks up the new locale.
+        ResourceBundle.clearCache();
         currentLocale = locale;
         Locale.setDefault(locale);
         setRoot(currentView);
@@ -86,7 +90,8 @@ public class App extends Application {
     }
 
     private static ResourceBundle readBundle(String resourceName) {
-        try (InputStream stream = App.class.getClassLoader().getResourceAsStream(resourceName)) {
+        // Use App.class to locate resources so it works in modular runs.
+        try (InputStream stream = App.class.getResourceAsStream("/" + resourceName)) {
             if (stream == null) return null;
             try (InputStreamReader reader = new InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)) {
                 return new PropertyResourceBundle(reader);
