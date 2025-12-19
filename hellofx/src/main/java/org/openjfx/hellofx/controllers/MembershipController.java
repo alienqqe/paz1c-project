@@ -94,7 +94,8 @@ public class MembershipController implements Initializable {
 
     @FXML
     private ComboBox<String> languageCombo;
-
+    @FXML
+    private javafx.scene.control.ToggleButton themeToggle;
     private ResourceBundle resources;
 
     private final AuthService authService = new AuthService();
@@ -107,6 +108,7 @@ public class MembershipController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
         setupLanguageSelector();
+        setupThemeSelector();
         if (resultsList != null) {
             resultsList.getItems().addListener((ListChangeListener<HBox>) change -> updateResultsVisibility());
             updateResultsVisibility();
@@ -411,7 +413,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.register"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -427,7 +430,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.coachSearch"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -443,7 +447,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.weeklySchedule"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -459,7 +464,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.booking"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -479,7 +485,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.userManagement"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -499,7 +506,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.visitHistory"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -523,7 +531,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(get("window.addAvailability"));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -551,7 +560,8 @@ public class MembershipController implements Initializable {
          Stage dialog = new Stage();
          dialog.setTitle(get("window.discountRules"));
          dialog.initModality(Modality.APPLICATION_MODAL);
-         dialog.setScene(new Scene(root));
+         Scene scene = new Scene(root);
+         dialog.setScene(scene);
          dialog.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -571,7 +581,8 @@ public class MembershipController implements Initializable {
 
             Stage stage = new Stage();
             stage.setTitle(String.format(get("window.assignMembership"), client.name()));
-            stage.setScene(new Scene(root));
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
             stage.show();
 
         } catch (IOException e) {
@@ -616,6 +627,22 @@ public class MembershipController implements Initializable {
             }
         });
     }
+
+    private void setupThemeSelector() {
+        if (themeToggle == null) return;
+        boolean isLight = App.getCurrentTheme().contains("light");
+        themeToggle.setSelected(isLight);
+        themeToggle.setText(isLight ? "Light" : "Dark");
+        themeToggle.setOnAction(e -> {
+            boolean nowLight = themeToggle.isSelected();
+            themeToggle.setText(nowLight ? "Light" : "Dark");
+            String themePath = nowLight
+                    ? "/org/openjfx/hellofx/styles-light.css"
+                    : "/org/openjfx/hellofx/styles.css";
+            App.switchTheme(themePath);
+        });
+    }
+
 
     private String get(String key) {
         return resources != null && resources.containsKey(key) ? resources.getString(key) : key;

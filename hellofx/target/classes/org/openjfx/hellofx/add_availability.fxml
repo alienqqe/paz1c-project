@@ -10,10 +10,14 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.AddAvailabilityController">
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.openjfx.hellofx.controllers.AddAvailabilityController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
     <content>
-        <VBox spacing="12.0" fillWidth="true">
+        <VBox spacing="12.0" fillWidth="true" styleClass="root-pane">
             <padding>
                 <Insets top="16" right="16" bottom="16" left="16"/>
             </padding>

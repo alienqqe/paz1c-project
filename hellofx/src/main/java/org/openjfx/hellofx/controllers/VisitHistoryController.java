@@ -35,6 +35,7 @@ public class VisitHistoryController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         clientCol.setCellValueFactory(cell ->
             new SimpleStringProperty(cell.getValue().clientName()));
         emailCol.setCellValueFactory(cell ->
@@ -44,6 +45,7 @@ public class VisitHistoryController implements Initializable {
         checkInCol.setCellValueFactory(cell ->
             new SimpleObjectProperty<>(cell.getValue().checkIn()));
         loadVisits(null);
+        
     }
 
     private void loadVisits(String filter) {

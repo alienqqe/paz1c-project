@@ -4,11 +4,15 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
+<?import java.net.URL?>
 
-<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+<ScrollPane fitToWidth="true" styleClass="root-pane" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
             fx:controller="org.openjfx.hellofx.controllers.WeeklyScheduleController">
+    <stylesheets>
+        <URL value="@styles.css" />
+    </stylesheets>
     <content>
-        <BorderPane>
+        <BorderPane styleClass="root-pane">
             <center>
                 <TableView fx:id="table">
                     <columns>

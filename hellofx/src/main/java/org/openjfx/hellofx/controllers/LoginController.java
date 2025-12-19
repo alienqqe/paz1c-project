@@ -15,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 
@@ -30,6 +31,9 @@ public class LoginController implements Initializable {
     private ComboBox<String> languageCombo;
 
     @FXML
+    private ToggleButton themeToggle;
+
+    @FXML
     private Label statusLabel;
 
     private final AuthService authService = new AuthService();
@@ -39,10 +43,8 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
-        resources.getKeys().asIterator().forEachRemaining(k ->
-        System.out.println(k + " = " + resources.getString(k))
-    );
         setupLanguageSelector();
+        setupThemeSelector();
     }
 
     @FXML
@@ -106,4 +108,20 @@ public class LoginController implements Initializable {
             }
         });
     }
+
+    private void setupThemeSelector() {
+        if (themeToggle == null) return;
+        boolean isLight = App.getCurrentTheme().contains("light");
+        themeToggle.setSelected(isLight);
+        themeToggle.setText(isLight ? "Light" : "Dark");
+        themeToggle.setOnAction(e -> {
+            boolean nowLight = themeToggle.isSelected();
+            themeToggle.setText(nowLight ? "Light" : "Dark");
+            String themePath = nowLight
+                    ? "/org/openjfx/hellofx/styles-light.css"
+                    : "/org/openjfx/hellofx/styles.css";
+            App.switchTheme(themePath);
+        });
+    }
+
 }
