@@ -22,11 +22,18 @@
             <Insets top="20.0" right="24.0" bottom="20.0" left="24.0" />
          </padding>
          <children>
-            <HBox alignment="CENTER_RIGHT" spacing="6.0" prefWidth="Infinity">
+            <HBox prefWidth="Infinity">
                <children>
-                  <Label text="%lang.label" />
-                  <ComboBox fx:id="languageCombo" prefWidth="140.0" />
-                  <ToggleButton fx:id="themeToggle" prefWidth="90.0" />
+                  <HBox alignment="CENTER_LEFT">
+                         <ToggleButton fx:id="themeToggle"
+                          prefWidth="90.0"
+                          styleClass="custom-theme-toggle"/>
+                   </HBox>
+
+                     <HBox alignment="CENTER_RIGHT" spacing="6.0" HBox.hgrow="ALWAYS">
+                     <Label text="%lang.label"/>
+                     <ComboBox fx:id="languageCombo" prefWidth="140.0"/>
+                  </HBox>
                </children>
             </HBox>
             <Label text="%login.title" styleClass="title" />

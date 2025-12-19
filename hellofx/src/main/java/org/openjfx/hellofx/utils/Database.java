@@ -1,5 +1,6 @@
 package org.openjfx.hellofx.utils;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -52,5 +53,33 @@ public class Database {
     // method to prevent errors, if some code is still using manual jdbc
     public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
+    }
+
+    /**
+     * Test-only hook: allows Testcontainers to supply its JDBC URL/credentials.
+     * Rebuilds the underlying HikariDataSource and JdbcTemplate.
+     */
+    public static synchronized void overrideDataSourceForTests(String jdbcUrl, String user, String pass) {
+        if (dataSource != null) {
+            dataSource.close();
+        }
+        HikariConfig cfg = new HikariConfig();
+        cfg.setJdbcUrl(jdbcUrl);
+        cfg.setUsername(user);
+        cfg.setPassword(pass);
+        cfg.setMaximumPoolSize(5);
+        cfg.setPoolName("gym_db_pool_test");
+        HikariDataSource testDs = new HikariDataSource(cfg);
+        try {
+            Field dsField = Database.class.getDeclaredField("dataSource");
+            dsField.setAccessible(true);
+            dsField.set(null, testDs);
+
+            Field jtField = Database.class.getDeclaredField("jdbcTemplate");
+            jtField.setAccessible(true);
+            jtField.set(null, new JdbcTemplate(testDs));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException("Failed to override datasource for tests", e);
+        }
     }
 }

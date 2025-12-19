@@ -14,15 +14,15 @@
     <content>
         <BorderPane styleClass="root-pane">
             <center>
-                <TableView fx:id="table">
+                <TableView fx:id="table" styleClass = "custom-table">
                     <columns>
-                        <TableColumn fx:id="coachCol" text="%weekly.coach"/>
-                        <TableColumn fx:id="clientCol" text="%weekly.client"/>
-                        <TableColumn fx:id="dayCol" text="%weekly.day"/>
-                        <TableColumn fx:id="startCol" text="%weekly.start"/>
-                        <TableColumn fx:id="endCol" text="%weekly.end"/>
-                        <TableColumn fx:id="titleCol" text="%weekly.title"/>
-                        <TableColumn fx:id="actionCol" text="%weekly.actions"/>
+                        <TableColumn fx:id="coachCol" text="%weekly.coach" styleClass = "customColum"/>
+                        <TableColumn fx:id="clientCol" text="%weekly.client" styleClass = "customColum"/>
+                        <TableColumn fx:id="dayCol" text="%weekly.day" styleClass = "customColum"/>
+                        <TableColumn fx:id="startCol" text="%weekly.start" styleClass = "customColum"/>
+                        <TableColumn fx:id="endCol" text="%weekly.end" styleClass = "customColum"/>
+                        <TableColumn fx:id="titleCol" text="%weekly.title" styleClass = "customColum"/>
+                        <TableColumn fx:id="actionCol" text="%weekly.actions" styleClass = "customColum"/>
                     </columns>
                 </TableView>
             </center>

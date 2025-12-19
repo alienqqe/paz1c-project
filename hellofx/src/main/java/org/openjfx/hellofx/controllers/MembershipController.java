@@ -414,6 +414,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.register"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -431,6 +432,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.coachSearch"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -448,6 +450,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.weeklySchedule"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -465,6 +468,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.booking"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -486,6 +490,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.userManagement"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -507,6 +512,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.visitHistory"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -532,6 +538,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(get("window.addAvailability"));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -561,6 +568,7 @@ public class MembershipController implements Initializable {
          dialog.setTitle(get("window.discountRules"));
          dialog.initModality(Modality.APPLICATION_MODAL);
          Scene scene = new Scene(root);
+         App.applyTheme(scene);
          dialog.setScene(scene);
          dialog.showAndWait();
         } catch (IOException e) {
@@ -582,6 +590,7 @@ public class MembershipController implements Initializable {
             Stage stage = new Stage();
             stage.setTitle(String.format(get("window.assignMembership"), client.name()));
             Scene scene = new Scene(root);
+            App.applyTheme(scene);
             stage.setScene(scene);
             stage.show();
 
