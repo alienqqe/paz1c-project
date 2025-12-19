@@ -4,7 +4,6 @@ org\openjfx\hellofx\dao\CoachDAO.class
 org\openjfx\hellofx\entities\CoachAvailability$DayOfWeekCustom.class
 org\openjfx\hellofx\controllers\UserManagementController$1.class
 org\openjfx\hellofx\controllers\WeeklyScheduleController$TableCellWithDelete.class
-org\openjfx\hellofx\SecondaryController.class
 org\openjfx\hellofx\controllers\AssignMembershipController$3.class
 org\openjfx\hellofx\controllers\AddAvailabilityController.class
 org\openjfx\hellofx\controllers\WeeklyScheduleController.class
@@ -35,10 +34,8 @@ module-info.class
 org\openjfx\hellofx\controllers\AssignMembershipController.class
 org\openjfx\hellofx\dao\ClientDAO.class
 org\openjfx\hellofx\entities\CoachAvailability.class
-org\openjfx\hellofx\PrimaryController.class
 org\openjfx\hellofx\entities\Membership$MembershipType.class
 org\openjfx\hellofx\controllers\DiscountRulesController.class
-org\openjfx\hellofx\dao\VisitDAO$VisitView.class
 org\openjfx\hellofx\entities\Coach.class
 org\openjfx\hellofx\entities\User.class
 org\openjfx\hellofx\dao\TimetableDAO.class

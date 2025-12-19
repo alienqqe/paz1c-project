@@ -7,8 +7,10 @@ import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
 import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.model.WeeklySession;
+import org.openjfx.hellofx.entities.TrainingSession;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -29,10 +31,12 @@ public class WeeklyScheduleController implements Initializable {
     @FXML private TableColumn<WeeklySession, String> titleCol;
     @FXML private TableColumn<WeeklySession, String> actionCol;
 
-    private final TimetableDAO coachDao = DaoFactory.timetable();
+    private final TimetableDAO timetableDAO = DaoFactory.timetable();
+    private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
     private ResourceBundle resources;
 
-    @FXML
+ 
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
         coachCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().coachName()));
@@ -48,15 +52,16 @@ public class WeeklyScheduleController implements Initializable {
     private void loadCurrentWeek() {
         LocalDate weekStart = LocalDate.now().with(DayOfWeek.MONDAY);
         try {
-            table.getItems().setAll(coachDao.getWeeklySessions(weekStart));
+            table.getItems().setAll(timetableDAO.getWeeklySessions(weekStart));
         } catch (SQLException e) {
-            Alert err = new Alert(Alert.AlertType.ERROR, get("weekly.error.load") + ": " + e.getMessage());
+            Alert err = new Alert(Alert.AlertType.ERROR, getInternationalization("weekly.error.load") + ": " + e.getMessage());
             err.showAndWait();
         }
     }
 
+    // method that creates a cell that has a delete button in it
     private class TableCellWithDelete extends javafx.scene.control.TableCell<WeeklySession, String> {
-        private final Button deleteBtn = new Button(get("weekly.delete"));
+        private final Button deleteBtn = new Button(getInternationalization("weekly.delete"));
 
         TableCellWithDelete() {
             deleteBtn.setOnAction(e -> {
@@ -64,14 +69,14 @@ public class WeeklyScheduleController implements Initializable {
                 if (session == null || session.id() == null) {
                     return;
                 }
-                Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, get("weekly.delete.confirm"), javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
-                confirm.showAndWait().ifPresent(btn -> {
-                    if (btn == javafx.scene.control.ButtonType.OK) {
-                        try {
-                            coachDao.deleteTrainingSession(session.id());
+                        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, getInternationalization("weekly.delete.confirm"), javafx.scene.control.ButtonType.OK, javafx.scene.control.ButtonType.CANCEL);
+                        confirm.showAndWait().ifPresent(btn -> {
+                            if (btn == javafx.scene.control.ButtonType.OK) {
+                                try {
+                            timetableDAO.deleteSessionAndRestoreAvailability(session.id());
                             loadCurrentWeek();
                         } catch (SQLException ex) {
-                            Alert err = new Alert(Alert.AlertType.ERROR, get("weekly.delete.fail") + ": " + ex.getMessage());
+                            Alert err = new Alert(Alert.AlertType.ERROR, getInternationalization("weekly.delete.fail") + ": " + ex.getMessage());
                             err.showAndWait();
                         }
                     }
@@ -79,6 +84,8 @@ public class WeeklyScheduleController implements Initializable {
             });
         }
 
+        // override native updateItem (gets called by itself when the cell's content changes) 
+        // method to add the delete button (or hide it)
         @Override
         protected void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
@@ -90,7 +97,7 @@ public class WeeklyScheduleController implements Initializable {
         }
     }
 
-    private String get(String key) {
+    private String getInternationalization(String key) {
         return resources != null && resources.containsKey(key) ? resources.getString(key) : key;
     }
 }

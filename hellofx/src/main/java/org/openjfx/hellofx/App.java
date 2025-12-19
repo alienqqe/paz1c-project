@@ -1,9 +1,9 @@
 package org.openjfx.hellofx;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.SQLException;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -48,6 +48,31 @@ public class App extends Application {
         return fxmlLoader.load();
     }
 
+      private static ResourceBundle readBundle(String resourceName) {
+        
+        try (InputStream stream = App.class.getResourceAsStream("/" + resourceName)) {
+            if (stream == null) return null;
+            try (InputStreamReader reader = new InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)) {
+                return new PropertyResourceBundle(reader);
+            }
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    
+    // manual loader to load diacritics properly
+    private static ResourceBundle loadBundle(Locale locale) {
+        String base = "org/openjfx/hellofx/messages";
+        String lang = locale.getLanguage();
+        String resourceName = base + "_" + lang + ".properties";
+        ResourceBundle bundle = readBundle(resourceName);
+        if (bundle == null) {
+            bundle = readBundle(base + ".properties");
+        }
+        return bundle;
+    }
+
     public static ResourceBundle getBundle() {
         ResourceBundle bundle = loadBundle(currentLocale);
         if (bundle == null && !Locale.ENGLISH.equals(currentLocale)) {
@@ -64,7 +89,7 @@ public class App extends Application {
 
     public static void switchLocale(Locale locale) throws IOException {
         if (locale == null) return;
-        // Clear cached bundles so the next load picks up the new locale.
+        // clear cached bundles so the next load picks up the new locale.
         ResourceBundle.clearCache();
         currentLocale = locale;
         Locale.setDefault(locale);
@@ -77,29 +102,8 @@ public class App extends Application {
         }
     }
 
-    // Manual UTF-8 bundle loader (avoids ResourceBundle.Control restriction in named modules)
-    private static ResourceBundle loadBundle(Locale locale) {
-        String base = "org/openjfx/hellofx/messages";
-        String lang = locale.getLanguage();
-        String resourceName = base + "_" + lang + ".properties";
-        ResourceBundle bundle = readBundle(resourceName);
-        if (bundle == null) {
-            bundle = readBundle(base + ".properties");
-        }
-        return bundle;
-    }
 
-    private static ResourceBundle readBundle(String resourceName) {
-        // Use App.class to locate resources so it works in modular runs.
-        try (InputStream stream = App.class.getResourceAsStream("/" + resourceName)) {
-            if (stream == null) return null;
-            try (InputStreamReader reader = new InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)) {
-                return new PropertyResourceBundle(reader);
-            }
-        } catch (IOException e) {
-            return null;
-        }
-    }
+  
 
     private void showInitError(Exception e) {
         e.printStackTrace();

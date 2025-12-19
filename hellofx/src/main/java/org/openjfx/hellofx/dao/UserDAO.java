@@ -1,15 +1,25 @@
 package org.openjfx.hellofx.dao;
 
-import org.mindrot.jbcrypt.BCrypt;
-import org.openjfx.hellofx.entities.User;
-import org.openjfx.hellofx.utils.Database;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
+import org.mindrot.jbcrypt.BCrypt;
+import org.openjfx.hellofx.entities.User;
+import org.openjfx.hellofx.utils.Database;
+
 public class UserDAO {
+
+     private User mapUser(ResultSet rs, int rowNum) throws SQLException {
+        return new User(
+            rs.getLong("id"),
+            rs.getString("username"),
+            rs.getString("password_hash"),
+            rs.getString("role"),
+            rs.getObject("coach_id", Long.class)
+        );
+    }
 
     public Optional<User> findByUsername(String username) throws SQLException {
         String sql = "SELECT id, username, password_hash, role, coach_id FROM users WHERE username = ?";
@@ -50,6 +60,7 @@ public class UserDAO {
         Database.jdbc().update(sql, hashed, userId);
     }
 
+    // update users.coach_id to keep user entity linked to the coach entity
     public void updateCoachId(Long userId, Long coachId) throws SQLException {
         String sql = "UPDATE users SET coach_id = ? WHERE id = ?";
         Database.jdbc().update(sql, ps -> {
@@ -62,13 +73,5 @@ public class UserDAO {
         });
     }
 
-    private User mapUser(ResultSet rs, int rowNum) throws SQLException {
-        return new User(
-            rs.getLong("id"),
-            rs.getString("username"),
-            rs.getString("password_hash"),
-            rs.getString("role"),
-            rs.getObject("coach_id", Long.class)
-        );
-    }
+   
 }

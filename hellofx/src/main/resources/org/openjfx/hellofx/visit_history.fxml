@@ -18,13 +18,12 @@
                     <padding>
                         <Insets top="10" right="10" bottom="10" left="10"/>
                     </padding>
-                    <children>
-                        <TextField fx:id="searchField" promptText="%visit.filterPrompt" prefWidth="240" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
-                        <Button text="%visit.search" onAction="#onSearch"/>
-                        <Button text="%visit.clear" onAction="#onClear"/>
-                    </children>
-                </HBox>
-            </top>
+            <children>
+                <TextField fx:id="searchField" promptText="%visit.filterPrompt" prefWidth="240" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="%visit.search" onAction="#onSearch"/>
+            </children>
+        </HBox>
+    </top>
             <center>
                 <TableView fx:id="table">
                     <columns>

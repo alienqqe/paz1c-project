@@ -1,12 +1,16 @@
 package org.openjfx.hellofx.utils;
 
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
 import io.github.cdimascio.dotenv.Dotenv;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 public class Database {
     private static final Dotenv dotenv = Dotenv.load();
@@ -22,6 +26,7 @@ public class Database {
     private static final String USER = dotenv.get("DB_USER");
     private static final String PASSWORD = dotenv.get("DB_PASSWORD");
 
+    // we use hikari data source, because it is faster, and manages the pooling.
     private static final HikariDataSource dataSource;
     private static final JdbcTemplate jdbcTemplate;
 
@@ -44,10 +49,7 @@ public class Database {
         return jdbcTemplate;
     }
 
-    /**
-     * Convenience method for callers still using manual JDBC code.
-     * Uses the pooled Hikari DataSource underneath.
-     */
+    // method to prevent errors, if some code is still using manual jdbc
     public static Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }

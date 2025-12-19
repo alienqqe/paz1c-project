@@ -87,6 +87,18 @@ public class AssignMembershipController implements Initializable {
 
     @FXML
     private void onConfirm() {
+         MembershipDAO dao = DaoFactory.memberships();
+
+         try {
+            if(dao.hasActiveMembership(clientId)){
+                showAlert(get("assign.error.alreadyHasMembership"));
+                return;
+             }
+        } catch (SQLException e) {
+            showAlert(get("assign.error.save") + ": " + e.getMessage());
+            return;
+        }
+
         Membership.MembershipType enumType = membershipTypeChoice.getValue();
         String price = priceField.getText();
         // Validate input
@@ -139,7 +151,7 @@ public class AssignMembershipController implements Initializable {
       
         int visits = enumType == Membership.MembershipType.Ten ? 10 : 0;
         Membership membership = new Membership(null, start, expires, priceVal, enumType, clientId, visits);
-        MembershipDAO dao = DaoFactory.memberships();
+       
         try {
             dao.addMembership(membership);
             System.out.println("Assigned membership to client id " + clientId);

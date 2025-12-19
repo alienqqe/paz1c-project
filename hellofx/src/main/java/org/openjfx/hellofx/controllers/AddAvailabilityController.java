@@ -101,6 +101,12 @@ public class AddAvailabilityController implements Initializable {
                 return;
             }
 
+            // prevent overlapping/duplicate availability
+            if (availabilityDAO.hasOverlap(coachId, start, end)) {
+                showAlert(Alert.AlertType.WARNING, get("availability.error.overlap"));
+                return;
+            }
+
             availabilityDAO.addAvailability(coachId, start, end, note.isEmpty() ? get("availability.defaultNote") : note);
             showAlert(Alert.AlertType.INFORMATION, get("availability.success.saved"));
             closeWindow();

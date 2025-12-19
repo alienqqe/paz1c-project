@@ -1,5 +1,24 @@
 package org.openjfx.hellofx.controllers;
 
+import java.net.URL;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import org.openjfx.hellofx.dao.ClientDAO;
+import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
+import org.openjfx.hellofx.dao.CoachDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.TimetableDAO;
+import org.openjfx.hellofx.entities.Client;
+import org.openjfx.hellofx.entities.Coach;
+import org.openjfx.hellofx.model.AvailabilitySlot;
+
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -10,26 +29,8 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.collections.ListChangeListener;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.openjfx.hellofx.dao.ClientDAO;
-import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.TimetableDAO;
-import org.openjfx.hellofx.entities.Client;
-import org.openjfx.hellofx.entities.Coach;
-import org.openjfx.hellofx.model.AvailabilitySlot;
-
-import java.net.URL;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class TrainingSessionBookingController implements Initializable {
 
@@ -110,6 +111,10 @@ public class TrainingSessionBookingController implements Initializable {
             }
 
             timetableDAO.addTrainingSession(clientId, coachId, start, end, title);
+            // shrink/split the availability 
+            if (selectedSlot != null) {
+                availabilityDAO.consumeAvailability(coachId, selectedSlot, start, end);
+            }
             showAlert(Alert.AlertType.INFORMATION, get("booking.success"));
             closeWindow();
         } catch (IllegalArgumentException iae) {

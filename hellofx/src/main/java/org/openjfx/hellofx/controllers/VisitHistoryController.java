@@ -1,5 +1,14 @@
 package org.openjfx.hellofx.controllers;
 
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ResourceBundle;
+
+import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.dao.VisitDAO;
+import org.openjfx.hellofx.model.VisitRow;
+
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -10,15 +19,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.VisitDAO;
-import org.openjfx.hellofx.dao.VisitDAO.VisitView;
-import org.openjfx.hellofx.model.VisitRow;
-
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.ResourceBundle;
 
 public class VisitHistoryController implements Initializable {
 
@@ -47,12 +47,13 @@ public class VisitHistoryController implements Initializable {
     }
 
     private void loadVisits(String filter) {
+        // we use observable list to make the table content reactive to the changes (so no refresh needed)
         ObservableList<VisitRow> rows = FXCollections.observableArrayList();
         try {
-            List<VisitView> result = (filter == null || filter.isBlank())
+            List<VisitRow> result = (filter == null || filter.isBlank())
                 ? visitDAO.getRecentVisits(200)
                 : visitDAO.getRecentVisitsForClient(filter.trim(), 200);
-            for (VisitView v : result) {
+            for (VisitRow v : result) {
                 rows.add(new VisitRow(
                     v.id(),
                     v.clientName(),
@@ -72,14 +73,6 @@ public class VisitHistoryController implements Initializable {
     void onSearch() {
         String filter = searchField != null ? searchField.getText() : null;
         loadVisits(filter);
-    }
-
-    @FXML
-    void onClear() {
-        if (searchField != null) {
-            searchField.clear();
-        }
-        loadVisits(null);
     }
 
     private String get(String key) {

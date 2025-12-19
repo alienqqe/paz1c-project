@@ -1,8 +1,6 @@
 package org.openjfx.hellofx.dao;
 
-/**
- * Simple factory/singleton provider for DAOs so controllers have a single place to obtain them.
- */
+
 public final class DaoFactory {
     private static final UserDAO USER_DAO = new UserDAO();
     private static final ClientDAO CLIENT_DAO = new ClientDAO();

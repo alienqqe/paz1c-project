@@ -198,7 +198,7 @@ public class UserManagementController implements Initializable {
             try {
                 var specNames = coachSpecsRaw.isBlank() ? java.util.Set.<String>of() : parseSpecializations(coachSpecsRaw);
 
-                Coach coach = new Coach(null, coachName, coachEmail, coachPhone, null, null);
+                Coach coach = new Coach(null, coachName, coachEmail, coachPhone, null);
                 // auto-assign username/password for coach: username = name, password = phone
                 username = coachName;
                 // ensure username unique for coach

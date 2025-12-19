@@ -19,7 +19,6 @@ public class CoachDAO {
         rs.getString("name"),
         rs.getString("email"),
         rs.getString("phone_number"),
-        null,
         null
     );
 
@@ -39,6 +38,19 @@ public class CoachDAO {
         return null;
     }
 
+     private List<Coach> attachSpecializations(List<Coach> coaches) throws SQLException {
+        if (coaches == null || coaches.isEmpty()) return coaches;
+        var specDao = DaoFactory.specializations();
+        return coaches.stream().map(c -> {
+            try {
+                Set<Specialization> specs = specDao.getSpecializationsForCoach(c.id());
+                return new Coach(c.id(), c.name(), c.email(), c.phoneNumber(), specs);
+            } catch (SQLException e) {
+                return c;
+            }
+        }).toList();
+    }
+
     public List<Coach> searchCoaches(String query) throws SQLException {
         String sql = "SELECT * FROM coaches WHERE LOWER(name) LIKE ? OR LOWER(email) LIKE ?";
         String pattern = "%" + query.toLowerCase() + "%";
@@ -49,35 +61,18 @@ public class CoachDAO {
         return attachSpecializations(base);
     }
 
+    // keep user entity linked to the coach entity
     public Long findCoachIdForUser(String username) throws SQLException {
         if (username == null || username.isBlank()) {
             return null;
         }
-        // try email match
-        String sql = "SELECT id FROM coaches WHERE email = ? LIMIT 1";
-        List<Long> byEmail = Database.jdbc().query(sql, ps -> ps.setString(1, username),
-            (ResultSet rs, int rowNum) -> rs.getLong("id"));
-        if (!byEmail.isEmpty()) {
-            return byEmail.get(0);
-        }
 
-        // try exact name match
+        // try name match
         String nameSql = "SELECT id FROM coaches WHERE LOWER(name) = LOWER(?) LIMIT 1";
         List<Long> byName = Database.jdbc().query(nameSql, ps -> ps.setString(1, username),
             (ResultSet rs, int rowNum) -> rs.getLong("id"));
         return byName.isEmpty() ? null : byName.get(0);
     }
 
-    private List<Coach> attachSpecializations(List<Coach> coaches) throws SQLException {
-        if (coaches == null || coaches.isEmpty()) return coaches;
-        var specDao = DaoFactory.specializations();
-        return coaches.stream().map(c -> {
-            try {
-                Set<Specialization> specs = specDao.getSpecializationsForCoach(c.id());
-                return new Coach(c.id(), c.name(), c.email(), c.phoneNumber(), c.upcomingTrainings(), specs);
-            } catch (SQLException e) {
-                return c;
-            }
-        }).toList();
-    }
+   
 }

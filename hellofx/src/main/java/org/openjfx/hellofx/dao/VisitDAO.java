@@ -4,17 +4,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.List;
 
+import org.openjfx.hellofx.model.VisitRow;
 import org.openjfx.hellofx.utils.Database;
 import org.springframework.jdbc.core.RowMapper;
 
 public class VisitDAO {
+    
 
-    public record VisitView(Long id, String clientName, String clientEmail, String membershipType, LocalDateTime checkIn) {}
-
-    private final RowMapper<VisitView> historyMapper = (rs, rowNum) -> new VisitView(
+    private final RowMapper<VisitRow> historyMapper = (rs, rowNum) -> new VisitRow(
         rs.getLong("id"),
         rs.getString("client_name"),
         rs.getString("client_email"),
@@ -94,7 +93,7 @@ public class VisitDAO {
         }
     }
 
-    public List<VisitView> getRecentVisits(int limit) {
+    public List<VisitRow> getRecentVisits(int limit) {
         String sql = """
             SELECT v.id,
                    c.name AS client_name,
@@ -110,7 +109,7 @@ public class VisitDAO {
         return Database.jdbc().query(sql, ps -> ps.setInt(1, limit), historyMapper);
     }
 
-    public List<VisitView> getRecentVisitsForClient(String filter, int limit) {
+    public List<VisitRow> getRecentVisitsForClient(String filter, int limit) {
         String sql = """
             SELECT v.id,
                    c.name AS client_name,

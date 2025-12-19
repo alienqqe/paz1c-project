@@ -1,13 +1,13 @@
 package org.openjfx.hellofx.utils;
 
+import java.sql.SQLException;
+import java.util.Optional;
+
 import org.mindrot.jbcrypt.BCrypt;
+import org.openjfx.hellofx.dao.CoachDAO;
 import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.UserDAO;
 import org.openjfx.hellofx.entities.User;
-import org.openjfx.hellofx.dao.CoachDAO;
-
-import java.sql.SQLException;
-import java.util.Optional;
 
 public class AuthService {
 
@@ -15,6 +15,7 @@ public class AuthService {
     private final CoachDAO coachDAO = DaoFactory.coaches();
 
    
+    // function that creates defaut user (admin)
     public void ensureDefaultAdmin() throws SQLException {
         if (userDAO.countUsers() == 0) {
             userDAO.createUser("admin", "admin123", "ADMIN", null);
@@ -22,6 +23,7 @@ public class AuthService {
     }
 
     public boolean login(String username, String password) throws SQLException {
+        // optional, bc the user can be null
         Optional<User> userOpt = userDAO.findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();

@@ -1,28 +1,24 @@
 package org.openjfx.hellofx.dao;
 
-import org.openjfx.hellofx.utils.Database;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.openjfx.hellofx.entities.Specialization;
 
-/**
- * DAO for coach specializations.
- */
+import org.openjfx.hellofx.entities.Specialization;
+import org.openjfx.hellofx.utils.Database;
+
+
 public class SpecializationDAO {
 
-    /**
-     * Ensures the specialization exists and returns its id.
-     */
+    // ensures specialization exists (either selects it, or inserts it in the db)
     public Long ensureSpecialization(String name) throws SQLException {
         String insertSql = "INSERT INTO specializations (name) VALUES (?)";
         try {
             Database.jdbc().update(insertSql, name);
         } catch (Exception ignore) {
-            // likely duplicate, fall through to lookup
+            // ignore: likely insert failed bc this specialization already exists (we proceed to return it later)
         }
         String selectSql = "SELECT id FROM specializations WHERE name = ? LIMIT 1";
         List<Long> ids = Database.jdbc().query(selectSql, ps -> ps.setString(1, name),
@@ -43,9 +39,8 @@ public class SpecializationDAO {
         return new HashSet<>(specs);
     }
 
-    /**
-     * Replaces all specializations for a coach with the provided set.
-     */
+    
+    // replaces all specializations for a coach with the provided set. 
     public void setSpecializationsForCoach(Long coachId, Set<String> names) throws SQLException {
         if (coachId == null) return;
         Database.jdbc().update("DELETE FROM coach_specializations WHERE coach_id = ?", coachId);
