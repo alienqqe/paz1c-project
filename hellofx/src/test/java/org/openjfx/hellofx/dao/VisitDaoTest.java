@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.entities.Membership;
-import org.openjfx.hellofx.dao.VisitDAO.VisitView;
+import org.openjfx.hellofx.model.VisitRow;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -38,7 +38,7 @@ class VisitDaoTest extends TestContainers {
     void checkInConsumesVisitAndLogsHistory() throws Exception {
         assertTrue(dao.checkInClient(clientId));
 
-        List<VisitView> visits = dao.getRecentVisits(5);
+        List<VisitRow> visits = dao.getRecentVisits(5);
         assertFalse(visits.isEmpty());
         assertEquals("Visitor", visits.get(0).clientName());
 

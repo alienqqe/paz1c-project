@@ -1,0 +1,6 @@
+org\openjfx\hellofx\dao\TestContainers.class
+org\openjfx\hellofx\dao\ClientDAOTest.class
+org\openjfx\hellofx\utils\AuthServiceTest.class
+org\openjfx\hellofx\dao\UserDAOTest.class
+org\openjfx\hellofx\dao\DiscountRuleDaoTest.class
+org\openjfx\hellofx\dao\MembershipDaoTest.class

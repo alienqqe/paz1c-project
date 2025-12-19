@@ -1,5 +1,7 @@
 package org.openjfx.hellofx.dao;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.openjfx.hellofx.entities.Coach;
 
@@ -11,7 +13,7 @@ class CoachDaoTest extends TestContainers {
 
     @Test
     void addCoachAndResolveByEmailOrName() throws Exception {
-        Long id = dao.addCoach(new Coach(null, "Coach One", "coach1@mail.com", "555", null, null));
+        Long id = dao.addCoach(new Coach(null, "Coach One", "coach1@mail.com", "555", Set.of()));
 
         assertNotNull(id);
         assertEquals(id, dao.findCoachIdForUser("coach1@mail.com"));

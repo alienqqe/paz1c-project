@@ -1,9 +1,9 @@
 package org.openjfx.hellofx.dao;
 
+import java.util.Set;
+
 import org.junit.jupiter.api.Test;
 import org.openjfx.hellofx.entities.Specialization;
-
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,7 +14,7 @@ class SpecializationDaoTest extends TestContainers {
 
     @Test
     void ensureAndAssignSpecializations() throws Exception {
-        Long coachId = coachDao.addCoach(new org.openjfx.hellofx.entities.Coach(null, "Spec Coach", "spec@mail.com", "777", null, null));
+        Long coachId = coachDao.addCoach(new org.openjfx.hellofx.entities.Coach(null, "Spec Coach", "spec@mail.com", "777", Set.of()));
 
         Long specId = dao.ensureSpecialization("Yoga");
         assertNotNull(specId);

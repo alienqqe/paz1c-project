@@ -1,11 +1,12 @@
 package org.openjfx.hellofx.dao;
 
-import org.junit.jupiter.api.Test;
-import org.openjfx.hellofx.model.AvailabilitySlot;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.openjfx.hellofx.model.AvailabilitySlot;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,7 +17,7 @@ class CoachAvailabilityDaoTest extends TestContainers {
 
     @Test
     void addAndQueryAvailability() throws Exception {
-        Long coachId = coachDao.addCoach(new org.openjfx.hellofx.entities.Coach(null, "C A", "ca@mail.com", "999", null, null));
+        Long coachId = coachDao.addCoach(new org.openjfx.hellofx.entities.Coach(null, "C A", "ca@mail.com", "999", Set.of()));
         LocalDateTime start = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0);
         LocalDateTime end = start.plusHours(2);
 
@@ -30,7 +31,7 @@ class CoachAvailabilityDaoTest extends TestContainers {
 
     @Test
     void deleteExpiredRemovesOldRecords() throws Exception {
-        Long coachId = coachDao.addCoach(new org.openjfx.hellofx.entities.Coach(null, "Old", "old@mail.com", "000", null, null));
+        Long coachId = coachDao.addCoach(new org.openjfx.hellofx.entities.Coach(null, "Old", "old@mail.com", "000", Set.of()));
         LocalDateTime pastStart = LocalDateTime.now().minusDays(2);
         dao.addAvailability(coachId, pastStart, pastStart.plusHours(1), "old");
 
