@@ -7,12 +7,11 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.SpecializationDAO;
-import org.openjfx.hellofx.dao.UserDAO;
 import org.openjfx.hellofx.entities.Coach;
 import org.openjfx.hellofx.entities.User;
+import org.openjfx.hellofx.services.CoachService;
+import org.openjfx.hellofx.services.SpecializationService;
+import org.openjfx.hellofx.services.UserService;
 import org.openjfx.hellofx.utils.AuthContext;
 import org.openjfx.hellofx.utils.AuthService;
 
@@ -91,9 +90,9 @@ public class UserManagementController implements Initializable {
     private Label changeStatus;
 
     private final AuthService authService = new AuthService();
-    private final CoachDAO coachDAO = DaoFactory.coaches();
-    private final SpecializationDAO specializationDAO = DaoFactory.specializations();
-    private final UserDAO userDAO = DaoFactory.users();
+    private final CoachService coachService = new CoachService();
+    private final SpecializationService specializationService = new SpecializationService();
+    private final UserService userService = new UserService();
     private ResourceBundle resources;
 
     @FXML
@@ -147,7 +146,7 @@ public class UserManagementController implements Initializable {
                 return;
             }
             try {
-                if (userDAO.findByUsername(username).isPresent()) {
+                if (userService.findByUsername(username).isPresent()) {
                     createStatus.setText(get("um.error.usernameExists"));
                     return;
                 }
@@ -202,15 +201,15 @@ public class UserManagementController implements Initializable {
                 // auto-assign username/password for coach: username = name, password = phone
                 username = coachName;
                 // ensure username unique for coach
-                if (userDAO.findByUsername(username).isPresent()) {
+                if (userService.findByUsername(username).isPresent()) {
                     createStatus.setText(get("um.error.coachUsernameExists"));
                     return;
                 }
-                coachId = coachDAO.addCoach(coach);
+                coachId = coachService.addCoach(coach);
                 password = coachPhone;
                 confirm = coachPhone;
                 if (coachId != null && !specNames.isEmpty()) {
-                    specializationDAO.setSpecializationsForCoach(coachId, specNames);
+                    specializationService.setForCoach(coachId, specNames);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

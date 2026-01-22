@@ -1,30 +1,29 @@
 package org.openjfx.hellofx.controllers;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
-import java.net.URL;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
 import org.openjfx.hellofx.App;
-import org.openjfx.hellofx.dao.ClientDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.MembershipDAO;
-import org.openjfx.hellofx.dao.SpecializationDAO;
-import org.openjfx.hellofx.dao.VisitDAO;
 import org.openjfx.hellofx.entities.Client;
+import org.openjfx.hellofx.services.ClientService;
+import org.openjfx.hellofx.services.MembershipService;
+import org.openjfx.hellofx.services.SpecializationService;
+import org.openjfx.hellofx.services.VisitService;
 import org.openjfx.hellofx.utils.AuthContext;
 import org.openjfx.hellofx.utils.AuthService;
 
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.collections.ListChangeListener;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -99,10 +98,10 @@ public class MembershipController implements Initializable {
     private ResourceBundle resources;
 
     private final AuthService authService = new AuthService();
-    private final ClientDAO clientDAO = DaoFactory.clients();
-    private final MembershipDAO membershipDAO = DaoFactory.memberships();
-    private final SpecializationDAO specializationDAO = DaoFactory.specializations();
-    private final VisitDAO visitDAO = DaoFactory.visits();
+    private final ClientService clientService = new ClientService();
+    private final MembershipService membershipService = new MembershipService();
+    private final SpecializationService specializationService = new SpecializationService();
+    private final VisitService visitService = new VisitService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -202,7 +201,7 @@ public class MembershipController implements Initializable {
         TextField specsField = new TextField();
 
         try {
-            var specs = specializationDAO.getSpecializationsForCoach(current.coachId());
+            var specs = specializationService.getForCoach(current.coachId());
             if (specs != null && !specs.isEmpty()) {
                 String joined = specs.stream().map(s -> s.name()).collect(java.util.stream.Collectors.joining(", "));
                 specsField.setText(joined);
@@ -256,7 +255,7 @@ public class MembershipController implements Initializable {
         // update specializations
         try {
             var specs = parseSpecializations(specsField.getText());
-            specializationDAO.setSpecializationsForCoach(current.coachId(), specs);
+            specializationService.setForCoach(current.coachId(), specs);
             showAlert(Alert.AlertType.INFORMATION, get("membership.coachProfile.updated"));
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, get("membership.coachProfile.specs.fail") + ": " + e.getMessage());
@@ -287,7 +286,7 @@ public class MembershipController implements Initializable {
         }
 
         try {
-            List<Client> found = clientDAO.searchClients(query);
+            List<Client> found = clientService.searchClients(query);
 
             if (found.isEmpty()) {
                 searchStatus.setText(get("membership.search.none"));
@@ -321,7 +320,7 @@ public class MembershipController implements Initializable {
         String currentType = null;
         Integer remainingVisits = null;
         try {
-            currentType = membershipDAO.getCurrentMembershipType(client.id());
+            currentType = membershipService.getCurrentMembershipType(client.id());
             if (currentType != null) {
                 membershipLabelText = switch (currentType) {
                     case "Ten" -> get("membership.type.ten");
@@ -330,7 +329,7 @@ public class MembershipController implements Initializable {
                     case "Yearly" -> get("membership.type.yearly");
                     default -> currentType;
                 };
-                remainingVisits = membershipDAO.getRemainingVisits(client.id());
+                remainingVisits = membershipService.getRemainingVisits(client.id());
                 if ("Ten".equalsIgnoreCase(currentType) && remainingVisits != null) {
                     membershipLabelText = membershipLabelText + " " + String.format(get("membership.left"), remainingVisits);
                 }
@@ -360,7 +359,7 @@ public class MembershipController implements Initializable {
 
             if (confirmed) {
                 try {
-                    membershipDAO.removeByHolderId(client.id());
+                    membershipService.removeByHolderId(client.id());
                     // Refresh results after deletion
                     onSearchButton(null);
                 } catch (SQLException ex) {
@@ -374,7 +373,7 @@ public class MembershipController implements Initializable {
         boolean tenExhausted = isTenMembership && remainingVisits != null && remainingVisits <= 0;
         boolean hasActiveMembership = true;
         try {
-            hasActiveMembership = membershipDAO.hasActiveMembership(client.id());
+            hasActiveMembership = membershipService.hasActiveMembership(client.id());
         } catch (SQLException ex) {
             ex.printStackTrace();
             hasActiveMembership = false;
@@ -382,7 +381,7 @@ public class MembershipController implements Initializable {
         checkInButton.setDisable(!hasMembership || tenExhausted || !hasActiveMembership);
         checkInButton.setOnAction(e -> {
             try {
-                boolean checkedIn = visitDAO.checkInClient(client.id());
+                boolean checkedIn = visitService.checkInClient(client.id());
                 if (checkedIn) {
                     // Refresh the row to reflect updated remaining visits / status
                     HBox refreshed = createClientRow(client);

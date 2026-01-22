@@ -9,9 +9,8 @@ import javafx.scene.control.DateCell;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
-import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
+import org.openjfx.hellofx.services.CoachAvailabilityService;
+import org.openjfx.hellofx.services.CoachService;
 import org.openjfx.hellofx.utils.AuthContext;
 
 import java.net.URL;
@@ -29,8 +28,8 @@ public class AddAvailabilityController implements Initializable {
     @FXML private TextField noteField;
     @FXML private Button saveButton;
 
-    private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
-    private final CoachDAO coachDAO = DaoFactory.coaches();
+    private final CoachAvailabilityService availabilityService = new CoachAvailabilityService();
+    private final CoachService coachService = new CoachService();
     private ResourceBundle resources;
 
     @Override
@@ -62,7 +61,7 @@ public class AddAvailabilityController implements Initializable {
         Long coachId = AuthContext.getCurrentUser() != null ? AuthContext.getCurrentUser().coachId() : null;
         if (coachId == null && AuthContext.getCurrentUser() != null) {
             try {
-                coachId = coachDAO.findCoachIdForUser(AuthContext.getCurrentUser().username());
+                coachId = coachService.findCoachIdForUser(AuthContext.getCurrentUser().username());
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -102,12 +101,12 @@ public class AddAvailabilityController implements Initializable {
             }
 
             // prevent overlapping/duplicate availability
-            if (availabilityDAO.hasOverlap(coachId, start, end)) {
+            if (availabilityService.hasOverlap(coachId, start, end)) {
                 showAlert(Alert.AlertType.WARNING, get("availability.error.overlap"));
                 return;
             }
 
-            availabilityDAO.addAvailability(coachId, start, end, note.isEmpty() ? get("availability.defaultNote") : note);
+            availabilityService.addAvailability(coachId, start, end, note.isEmpty() ? get("availability.defaultNote") : note);
             showAlert(Alert.AlertType.INFORMATION, get("availability.success.saved"));
             closeWindow();
         } catch (java.time.format.DateTimeParseException dtpe) {

@@ -6,9 +6,8 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
-import org.openjfx.hellofx.dao.ClientDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.entities.Client;
+import org.openjfx.hellofx.services.ClientService;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,7 +23,7 @@ public class RegisterController implements Initializable {
     @FXML private TextField phoneField;
     @FXML private Label statusLabel;
 
-    private final ClientDAO clientDAO = DaoFactory.clients();
+    private final ClientService clientService = new ClientService();
     private ResourceBundle resources;
 
     @Override
@@ -54,7 +53,7 @@ public class RegisterController implements Initializable {
         Client client = new Client(null, name, email, phone);
 
         try {
-            clientDAO.addClient(client);
+            clientService.addClient(client);
             showAlert(Alert.AlertType.INFORMATION, get("register.success"));
             clearFields();
         } catch (SQLException e) {  

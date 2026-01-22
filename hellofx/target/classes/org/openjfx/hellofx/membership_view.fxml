@@ -80,7 +80,7 @@
                         <Font size="14.0" />
                      </font>
                   </Label>
-                  <ListView fx:id="resultsList" VBox.vgrow="ALWAYS" maxWidth="Infinity" />
+                  <ListView fx:id="resultsList" VBox.vgrow="ALWAYS" maxWidth="Infinity" styleClass="custom-datePicker" />
                </children>
             </VBox>
             <VBox alignment="CENTER" spacing="12.0">

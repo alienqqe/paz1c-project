@@ -49,14 +49,14 @@
 
             <VBox spacing="6" prefWidth="360" maxWidth="Infinity">
                 <Label text="%booking.client.suggestions" />
-                <ListView fx:id="clientSuggestions" prefHeight="80" visible="false" managed="false" />
+                <ListView fx:id="clientSuggestions" prefHeight="80" visible="false" managed="false" styleClass="suggestions-list" />
                 <Label text="%booking.coach.suggestions" />
-                <ListView fx:id="coachSuggestions" prefHeight="80" visible="false" managed="false" />
+                <ListView fx:id="coachSuggestions" prefHeight="80" visible="false" managed="false" styleClass="suggestions-list" />
             </VBox>
 
             <VBox spacing="8" prefWidth="360" maxWidth="Infinity">
                 <Label text="%booking.slots" />
-                <ListView fx:id="slotsList" prefHeight="180.0" VBox.vgrow="ALWAYS" maxWidth="Infinity" />
+                <ListView fx:id="slotsList" prefHeight="180.0" VBox.vgrow="ALWAYS" maxWidth="Infinity" styleClass="slots-list" />
                 <HBox spacing="10" alignment="CENTER_LEFT">
                     <Label text="%booking.start" />
                     <TextField fx:id="startTimeField" promptText="%booking.start.prompt" prefWidth="80" />

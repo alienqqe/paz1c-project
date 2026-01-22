@@ -61,10 +61,10 @@
                     <Separator/>
 
                     <Label text="%discount.preview.table"/>
-                    <TableView fx:id="rulesTable" prefHeight="240" VBox.vgrow="ALWAYS">
+                    <TableView fx:id="rulesTable" prefHeight="240" VBox.vgrow="ALWAYS" styleClass= "custom-table">
                         <columns>
-                            <TableColumn fx:id="thresholdCol" text="%discount.column.threshold" prefWidth="200"/>
-                            <TableColumn fx:id="percentCol" text="%discount.column.percent" prefWidth="150"/>
+                            <TableColumn fx:id="thresholdCol" text="%discount.column.threshold" prefWidth="200" styleClass= "customColum "/>
+                            <TableColumn fx:id="percentCol" text="%discount.column.percent" prefWidth="150" styleClass= "customColum " />
                         </columns>
                     </TableView>
                 </VBox>

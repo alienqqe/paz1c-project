@@ -1,4 +1,3 @@
-/* Light theme */
 .root {
     -fx-background-color: #f5f6f8;
     -fx-text-fill: #111111;
@@ -86,8 +85,8 @@
     -fx-background-radius: 0 10 10 0;
     -fx-border-radius: 0 10 10 0;
     -fx-padding: 0 10;
-    -fx-alignment: CENTER;          /* центруємо стрілку по вертикалі */
-    -fx-min-width: 36;               /* фіксована ширина кнопки зі стрілкою */
+    -fx-alignment: CENTER;        
+    -fx-min-width: 36;             
     -fx-pref-width: 36;
 }
 .combo-box .arrow {
@@ -121,13 +120,10 @@
     -fx-background-color: linear-gradient(to bottom, #3B82F6, #2563EB);
 
     -fx-padding: 10 16;
-
-    /* легша тінь, щоб не було “жирно” на білому фоні */
     -fx-effect: dropshadow(gaussian, rgba(37, 99, 235, 0.18), 8, 0.20, 0, 3);
 }
 
 .button:hover {
-    /* hover — трохи темніше, але без різкого стрибка в фіолет */
     -fx-background-color: linear-gradient(to bottom, #2563EB, #1D4ED8);
 
     -fx-text-fill: #ffffff;
@@ -157,9 +153,9 @@
     -fx-border-radius: 10;
 }
 .toggle-button.custom-theme-toggle:selected {
-    -fx-background-color: #155ae2;   /* світло-сірий */
+    -fx-background-color: #155ae2; 
     -fx-text-fill: #111827;    
-     -fx-background-insets: 0;      /* темний текст */
+     -fx-background-insets: 0;     
     -fx-effect: dropshadow(gaussian, rgb(70, 68, 63), 18, 0.30, 0, 6);
     -fx-background-radius: 10;
     -fx-padding: 6 14;

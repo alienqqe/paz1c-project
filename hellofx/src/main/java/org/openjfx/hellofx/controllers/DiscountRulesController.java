@@ -1,5 +1,15 @@
 package org.openjfx.hellofx.controllers;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+import org.openjfx.hellofx.entities.DiscountRule;
+import org.openjfx.hellofx.services.DiscountRuleService;
+
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -9,16 +19,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.DiscountRuleDAO;
-import org.openjfx.hellofx.entities.DiscountRule;
-
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class DiscountRulesController implements Initializable {
 
@@ -31,12 +31,13 @@ public class DiscountRulesController implements Initializable {
     @FXML private TableColumn<DiscountRule, Integer> thresholdCol;
     @FXML private TableColumn<DiscountRule, Integer> percentCol;
 
-    private final DiscountRuleDAO discountRuleDAO = DaoFactory.discountRules();
+    private final DiscountRuleService discountRuleService = new DiscountRuleService();
     private ResourceBundle resources;
 
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        rulesTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         thresholdCol.setCellValueFactory(cell ->
             new SimpleIntegerProperty(cell.getValue().visitsThreshold()).asObject());
         percentCol.setCellValueFactory(cell ->
@@ -45,7 +46,7 @@ public class DiscountRulesController implements Initializable {
     }
 
     private void refreshFromDb() {
-        var rules = discountRuleDAO.findAllOrdered();
+        var rules = discountRuleService.findAllOrdered();
         rulesTable.setItems(FXCollections.observableArrayList(rules));
         setInputsFromRules(rules);
     }
@@ -106,7 +107,7 @@ public class DiscountRulesController implements Initializable {
     private void onSave() {
         try {
             List<DiscountRule> parsed = parseRules();
-            discountRuleDAO.replaceAll(parsed);
+            discountRuleService.replaceAll(parsed);
             refreshFromDb();
             setMessage(String.format(get("discount.message.saved"), parsed.size()), "-fx-text-fill: green;");
         } catch (Exception ex) {

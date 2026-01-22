@@ -6,12 +6,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.DiscountRuleDAO;
-import org.openjfx.hellofx.dao.MembershipDAO;
-import org.openjfx.hellofx.dao.VisitDAO;
 import org.openjfx.hellofx.entities.DiscountRule;
 import org.openjfx.hellofx.entities.Membership;
+import org.openjfx.hellofx.services.DiscountRuleService;
+import org.openjfx.hellofx.services.MembershipService;
+import org.openjfx.hellofx.services.VisitService;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -42,6 +41,9 @@ public class AssignMembershipController implements Initializable {
     
     private Runnable onSaved;
     private ResourceBundle resources;
+    private final MembershipService membershipService = new MembershipService();
+    private final DiscountRuleService discountRuleService = new DiscountRuleService();
+    private final VisitService visitService = new VisitService();
 
     @Override
     public void initialize(URL url, ResourceBundle resources) {
@@ -87,10 +89,8 @@ public class AssignMembershipController implements Initializable {
 
     @FXML
     private void onConfirm() {
-         MembershipDAO dao = DaoFactory.memberships();
-
          try {
-            if(dao.hasActiveMembership(clientId)){
+            if(membershipService.hasActiveMembership(clientId)){
                 showAlert(get("assign.error.alreadyHasMembership"));
                 return;
              }
@@ -107,13 +107,16 @@ public class AssignMembershipController implements Initializable {
             return;
         }
 
-        DiscountRuleDAO discountRuleDAO = DaoFactory.discountRules();
-        VisitDAO visitDao = DaoFactory.visits();
-
-        int visitCount = visitDao.countVisitsForClient(clientId);
+        int visitCount;
+        try {
+            visitCount = visitService.countVisitsForClient(clientId);
+        } catch (SQLException e) {
+            showAlert(get("assign.error.save") + ": " + e.getMessage());
+            return;
+        }
 
         double priceVal = 0.0;
-        Optional<DiscountRule> bestDiscount = discountRuleDAO.bestRuleForVisits(visitCount);
+        Optional<DiscountRule> bestDiscount = discountRuleService.bestRuleForVisits(visitCount);
         int appliedPercent = 0;
         double basePrice = 0.0;
         try {
@@ -153,7 +156,7 @@ public class AssignMembershipController implements Initializable {
         Membership membership = new Membership(null, start, expires, priceVal, enumType, clientId, visits);
        
         try {
-            dao.addMembership(membership);
+            membershipService.addMembership(membership);
             System.out.println("Assigned membership to client id " + clientId);
             if (appliedPercent > 0) {
                 showInfo(String.format(get("assign.discount.applied"), appliedPercent, visitCount, basePrice, priceVal));

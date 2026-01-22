@@ -9,14 +9,13 @@ import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import org.openjfx.hellofx.dao.ClientDAO;
-import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
-import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.entities.Client;
 import org.openjfx.hellofx.entities.Coach;
 import org.openjfx.hellofx.model.AvailabilitySlot;
+import org.openjfx.hellofx.services.ClientService;
+import org.openjfx.hellofx.services.CoachAvailabilityService;
+import org.openjfx.hellofx.services.CoachService;
+import org.openjfx.hellofx.services.TimetableService;
 
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -46,10 +45,10 @@ public class TrainingSessionBookingController implements Initializable {
     @FXML private TextField startTimeField;
     @FXML private TextField endTimeField;
 
-    private final ClientDAO clientDAO = DaoFactory.clients();
-    private final CoachDAO coachDAO = DaoFactory.coaches();
-    private final TimetableDAO timetableDAO = DaoFactory.timetable();
-    private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
+    private final ClientService clientService = new ClientService();
+    private final CoachService coachService = new CoachService();
+    private final TimetableService timetableService = new TimetableService();
+    private final CoachAvailabilityService availabilityService = new CoachAvailabilityService();
     private ResourceBundle resources;
 
     @FXML
@@ -98,22 +97,22 @@ public class TrainingSessionBookingController implements Initializable {
             }
 
             // ensure within availability
-            boolean withinAvailability = availabilityDAO.isWithinAvailability(coachId, start, end);
+            boolean withinAvailability = availabilityService.isWithinAvailability(coachId, start, end);
             if (!withinAvailability) {
                 showAlert(Alert.AlertType.WARNING, get("booking.error.outside"));
                 return;
             }
 
             // prevent double booking
-            if (timetableDAO.hasConflictingSession(coachId, start, end)) {
+            if (timetableService.hasConflictingSession(coachId, start, end)) {
                 showAlert(Alert.AlertType.WARNING, get("booking.error.conflict"));
                 return;
             }
 
-            timetableDAO.addTrainingSession(clientId, coachId, start, end, title);
+            timetableService.addTrainingSession(clientId, coachId, start, end, title);
             // shrink/split the availability 
             if (selectedSlot != null) {
-                availabilityDAO.consumeAvailability(coachId, selectedSlot, start, end);
+                availabilityService.consumeAvailability(coachId, selectedSlot, start, end);
             }
             showAlert(Alert.AlertType.INFORMATION, get("booking.success"));
             closeWindow();
@@ -145,9 +144,9 @@ public class TrainingSessionBookingController implements Initializable {
         }
 
         try {
-            availabilityDAO.deleteExpired();
+            availabilityService.deleteExpired();
             Long coachId = resolveCoachIdByName(coachName);
-            List<AvailabilitySlot> slots = availabilityDAO.getAvailabilityForDate(coachId, date);
+            List<AvailabilitySlot> slots = availabilityService.getAvailabilityForDate(coachId, date);
             if (slots.isEmpty()) {
                 statusLabel.setText(get("booking.status.none"));
                 slotsList.getItems().clear();
@@ -243,7 +242,7 @@ public class TrainingSessionBookingController implements Initializable {
     }
 
     private Long resolveClientIdByName(String name) throws SQLException {
-        List<Client> matches = clientDAO.searchClients(name).stream()
+        List<Client> matches = clientService.searchClients(name).stream()
             .filter(c -> c.name().equalsIgnoreCase(name))
             .toList();
         if (matches.isEmpty()) {
@@ -256,7 +255,7 @@ public class TrainingSessionBookingController implements Initializable {
     }
 
     private Long resolveCoachIdByName(String name) throws SQLException {
-        List<Coach> matches = coachDAO.searchCoaches(name).stream()
+        List<Coach> matches = coachService.searchCoaches(name).stream()
             .filter(c -> c.name().equalsIgnoreCase(name))
             .toList();
         if (matches.isEmpty()) {
@@ -274,7 +273,7 @@ public class TrainingSessionBookingController implements Initializable {
             return;
         }
         try {
-            List<String> names = clientDAO.searchClients(query.trim()).stream()
+            List<String> names = clientService.searchClients(query.trim()).stream()
                 .map(Client::name)
                 .distinct()
                 .collect(Collectors.toList());
@@ -297,7 +296,7 @@ public class TrainingSessionBookingController implements Initializable {
             return;
         }
         try {
-            List<Coach> matches = coachDAO.searchCoaches(query.trim());
+            List<Coach> matches = coachService.searchCoaches(query.trim());
             List<String> labels = matches.stream()
                 .map(c -> {
                     String specs = (c.specializations() != null && !c.specializations().isEmpty())

@@ -49,11 +49,11 @@
                      <font>
                         <Font size="14.0" />
                      </font></Label>
-                  <ChoiceBox fx:id="membershipTypeChoice" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity">
+                  <ChoiceBox fx:id="membershipTypeChoice" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" styleClass = "choice-box-custom">
                      <GridPane.margin>
                         <Insets left="10.0" />
                      </GridPane.margin></ChoiceBox>
-                  <DatePicker fx:id="startDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity">
+                  <DatePicker fx:id="startDatePicker" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.hgrow="ALWAYS" maxWidth="Infinity" styleClass = "custom-datePicker">
                      <GridPane.margin>
                         <Insets left="10.0" right="10.0" />
                      </GridPane.margin></DatePicker>

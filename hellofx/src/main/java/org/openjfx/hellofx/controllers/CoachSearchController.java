@@ -10,9 +10,8 @@ import javafx.collections.ListChangeListener;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import org.openjfx.hellofx.dao.CoachDAO;
-import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.entities.Coach;
+import org.openjfx.hellofx.services.CoachService;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -26,7 +25,7 @@ public class CoachSearchController implements Initializable {
     @FXML private TextField searchField;
     @FXML private Label searchStatus;
 
-    private final CoachDAO coachDAO = DaoFactory.coaches();
+    private final CoachService coachService = new CoachService();
     private ResourceBundle resources;
 
     @Override
@@ -50,7 +49,7 @@ public class CoachSearchController implements Initializable {
         }
 
         try {
-            List<Coach> found = coachDAO.searchCoaches(query);
+            List<Coach> found = coachService.searchCoaches(query);
             if (found.isEmpty()) {
                 searchStatus.setText(get("coachSearch.status.none"));
             } else {

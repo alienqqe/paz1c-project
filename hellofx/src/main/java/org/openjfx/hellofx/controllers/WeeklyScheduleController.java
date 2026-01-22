@@ -6,11 +6,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.ResourceBundle;
 
-import org.openjfx.hellofx.dao.DaoFactory;
-import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
-import org.openjfx.hellofx.dao.TimetableDAO;
 import org.openjfx.hellofx.model.WeeklySession;
-import org.openjfx.hellofx.entities.TrainingSession;
+import org.openjfx.hellofx.services.TimetableService;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
@@ -31,14 +28,14 @@ public class WeeklyScheduleController implements Initializable {
     @FXML private TableColumn<WeeklySession, String> titleCol;
     @FXML private TableColumn<WeeklySession, String> actionCol;
 
-    private final TimetableDAO timetableDAO = DaoFactory.timetable();
-    private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
+    private final TimetableService timetableService = new TimetableService();
     private ResourceBundle resources;
 
  
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         coachCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().coachName()));
         clientCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().clientName()));
         dayCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().day().toString()));
@@ -52,7 +49,7 @@ public class WeeklyScheduleController implements Initializable {
     private void loadCurrentWeek() {
         LocalDate weekStart = LocalDate.now().with(DayOfWeek.MONDAY);
         try {
-            table.getItems().setAll(timetableDAO.getWeeklySessions(weekStart));
+            table.getItems().setAll(timetableService.getWeeklySessions(weekStart));
         } catch (SQLException e) {
             Alert err = new Alert(Alert.AlertType.ERROR, getInternationalization("weekly.error.load") + ": " + e.getMessage());
             err.showAndWait();
@@ -73,7 +70,7 @@ public class WeeklyScheduleController implements Initializable {
                         confirm.showAndWait().ifPresent(btn -> {
                             if (btn == javafx.scene.control.ButtonType.OK) {
                                 try {
-                            timetableDAO.deleteSessionAndRestoreAvailability(session.id());
+                            timetableService.deleteSessionAndRestoreAvailability(session.id());
                             loadCurrentWeek();
                         } catch (SQLException ex) {
                             Alert err = new Alert(Alert.AlertType.ERROR, getInternationalization("weekly.delete.fail") + ": " + ex.getMessage());

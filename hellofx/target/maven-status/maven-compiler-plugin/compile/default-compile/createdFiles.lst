@@ -13,7 +13,6 @@ org\openjfx\hellofx\utils\AuthContext.class
 org\openjfx\hellofx\controllers\CoachSearchController.class
 org\openjfx\hellofx\entities\Specialization.class
 org\openjfx\hellofx\controllers\TrainingSessionBookingController.class
-org\openjfx\hellofx\controllers\AssignMembershipController$1.class
 org\openjfx\hellofx\controllers\MembershipController.class
 org\openjfx\hellofx\dao\DiscountRuleDAO.class
 org\openjfx\hellofx\controllers\MembershipController$1.class
@@ -23,7 +22,6 @@ org\openjfx\hellofx\entities\Client.class
 org\openjfx\hellofx\dao\CoachAvailabilityDAO.class
 org\openjfx\hellofx\utils\Database.class
 org\openjfx\hellofx\model\VisitRow.class
-org\openjfx\hellofx\controllers\AssignMembershipController$2.class
 org\openjfx\hellofx\controllers\VisitHistoryController.class
 org\openjfx\hellofx\dao\SpecializationDAO.class
 org\openjfx\hellofx\dao\VisitDAO.class
@@ -31,7 +29,6 @@ org\openjfx\hellofx\controllers\TrainingSessionBookingController$1.class
 org\openjfx\hellofx\controllers\UserManagementController.class
 org\openjfx\hellofx\dao\UserDAO.class
 module-info.class
-org\openjfx\hellofx\controllers\AssignMembershipController.class
 org\openjfx\hellofx\dao\ClientDAO.class
 org\openjfx\hellofx\entities\CoachAvailability.class
 org\openjfx\hellofx\entities\Membership$MembershipType.class
