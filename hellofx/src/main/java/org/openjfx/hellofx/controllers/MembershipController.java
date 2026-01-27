@@ -14,6 +14,7 @@ import org.openjfx.hellofx.services.ClientService;
 import org.openjfx.hellofx.services.MembershipService;
 import org.openjfx.hellofx.services.SpecializationService;
 import org.openjfx.hellofx.services.VisitService;
+import org.openjfx.hellofx.model.ClientWithMembershipStatus;
 import org.openjfx.hellofx.utils.AuthContext;
 import org.openjfx.hellofx.utils.AuthService;
 
@@ -60,6 +61,8 @@ public class MembershipController implements Initializable {
 
     @FXML
     private Button availabilityButton;
+    @FXML
+    private Button manageAvailabilityButton;
 
     @FXML
     private Button visitHistoryButton;
@@ -133,6 +136,11 @@ public class MembershipController implements Initializable {
             availabilityButton.setVisible(isCoach);
             availabilityButton.setManaged(isCoach);
         }
+        if (manageAvailabilityButton != null) {
+            manageAvailabilityButton.setDisable(!isCoach);
+            manageAvailabilityButton.setVisible(isCoach);
+            manageAvailabilityButton.setManaged(isCoach);
+        }
         if (visitHistoryButton != null) {
             boolean canViewHistory = AuthContext.isAdmin() || !AuthContext.isCoach();
             visitHistoryButton.setDisable(!canViewHistory);
@@ -163,7 +171,7 @@ public class MembershipController implements Initializable {
             }
             if (actionsRow2 != null) {
                 actionsRow2.getChildren().forEach(node -> {
-                    if (node == availabilityButton || node == logoutButton || node == coachProfileButton) {
+                    if (node == availabilityButton || node == manageAvailabilityButton || node == logoutButton || node == coachProfileButton) {
                         node.setVisible(true);
                         node.setDisable(false);
                         node.setManaged(true);
@@ -286,13 +294,13 @@ public class MembershipController implements Initializable {
         }
 
         try {
-            List<Client> found = clientService.searchClients(query);
+            List<ClientWithMembershipStatus> found = clientService.searchClientsWithStatus(query);
 
             if (found.isEmpty()) {
                 searchStatus.setText(get("membership.search.none"));
             } else {
                 searchStatus.setText(String.format(get("membership.search.found"), found.size()));
-                for (Client c : found) {
+                for (ClientWithMembershipStatus c : found) {
                     HBox row = createClientRow(c);
                     resultsList.getItems().add(row);
                 }
@@ -315,33 +323,27 @@ public class MembershipController implements Initializable {
     }
 
     // Creates one row in the results list: "Client Name  [Assign Button]"
-    private HBox createClientRow(Client client) {
+    private HBox createClientRow(ClientWithMembershipStatus client) {
         String membershipLabelText = get("membership.type.none");
-        String currentType = null;
-        Integer remainingVisits = null;
-        try {
-            currentType = membershipService.getCurrentMembershipType(client.id());
-            if (currentType != null) {
-                membershipLabelText = switch (currentType) {
-                    case "Ten" -> get("membership.type.ten");
-                    case "Monthly" -> get("membership.type.monthly");
-                    case "Weekly" -> get("membership.type.weekly");
-                    case "Yearly" -> get("membership.type.yearly");
-                    default -> currentType;
-                };
-                remainingVisits = membershipService.getRemainingVisits(client.id());
-                if ("Ten".equalsIgnoreCase(currentType) && remainingVisits != null) {
-                    membershipLabelText = membershipLabelText + " " + String.format(get("membership.left"), remainingVisits);
-                }
+        String currentType = client.membershipType();
+        Integer remainingVisits = client.remainingVisits();
+        if (currentType != null) {
+            membershipLabelText = switch (currentType) {
+                case "Ten" -> get("membership.type.ten");
+                case "Monthly" -> get("membership.type.monthly");
+                case "Weekly" -> get("membership.type.weekly");
+                case "Yearly" -> get("membership.type.yearly");
+                default -> currentType;
+            };
+            if ("Ten".equalsIgnoreCase(currentType) && remainingVisits != null) {
+                membershipLabelText = membershipLabelText + " " + String.format(get("membership.left"), remainingVisits);
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         }
 
         boolean isAdmin = AuthContext.isAdmin();
-        Label nameLabel = new Label(client.email() + " (" + client.name() + ") - " + get("membership.label") + ": " + membershipLabelText);
+        Label nameAndPhoneLabel = new Label(client.email() + " (" + client.name() + "," + client.phoneNumber() + ") - " + get("membership.label") + ": " + membershipLabelText);
         Button assignButton = new Button(get("membership.assign"));
-        assignButton.setOnAction(e -> openAssignMembershipWindow(client));
+        assignButton.setOnAction(e -> openAssignMembershipWindow(new Client(client.id(), client.name(), client.email(), client.phoneNumber())));
 
         Button deleteBtn = new Button(get("membership.delete"));
         boolean hasMembership = currentType != null;
@@ -371,24 +373,14 @@ public class MembershipController implements Initializable {
         Button checkInButton = new Button(get("membership.checkin"));
         boolean isTenMembership = "Ten".equalsIgnoreCase(currentType);
         boolean tenExhausted = isTenMembership && remainingVisits != null && remainingVisits <= 0;
-        boolean hasActiveMembership = true;
-        try {
-            hasActiveMembership = membershipService.hasActiveMembership(client.id());
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            hasActiveMembership = false;
-        }
+        boolean hasActiveMembership = currentType != null;
         checkInButton.setDisable(!hasMembership || tenExhausted || !hasActiveMembership);
         checkInButton.setOnAction(e -> {
             try {
                 boolean checkedIn = visitService.checkInClient(client.id());
                 if (checkedIn) {
-                    // Refresh the row to reflect updated remaining visits / status
-                    HBox refreshed = createClientRow(client);
-                    int idx = resultsList.getItems().indexOf(checkInButton.getParent());
-                    if (idx >= 0) {
-                        resultsList.getItems().set(idx, refreshed);
-                    }
+                    // Refresh the list to reflect updated remaining visits / status
+                    onSearchButton(null);
                     showAlert(Alert.AlertType.INFORMATION, get("membership.checkin.ok"));
                 } else {
                     showAlert(Alert.AlertType.WARNING, get("membership.checkin.invalid"));
@@ -400,7 +392,7 @@ public class MembershipController implements Initializable {
         });
 
         HBox row = new HBox(10);
-        row.getChildren().addAll(nameLabel, assignButton, deleteBtn, checkInButton);
+        row.getChildren().addAll(nameAndPhoneLabel, assignButton, deleteBtn, checkInButton);
         return row;
     }
 
@@ -649,6 +641,32 @@ public class MembershipController implements Initializable {
                     : "/org/openjfx/hellofx/styles.css";
             App.switchTheme(themePath);
         });
+    }
+
+    @FXML
+    void onManageAvailability(ActionEvent event) {
+        if (!AuthContext.isCoach()) {
+            showAlert(Alert.AlertType.WARNING, get("membership.availability.onlyCoach"));
+            return;
+        }
+        if (AuthContext.getCurrentUser() == null || AuthContext.getCurrentUser().coachId() == null) {
+            showAlert(Alert.AlertType.ERROR, get("membership.availability.noProfile"));
+            return;
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(App.class.getResource("/org/openjfx/hellofx/coach_availability_list.fxml"), App.getBundle());
+            Parent root = loader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle(get("window.coachAvailabilityList"));
+            Scene scene = new Scene(root);
+            App.applyTheme(scene);
+            stage.setScene(scene);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, get("membership.open.availabilityList.error") + ": " + e.getMessage());
+        }
     }
 
 

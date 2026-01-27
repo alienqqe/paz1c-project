@@ -173,10 +173,50 @@
     -fx-text-fill: white;
 }
 .custom-table{
-    -fx-background-color: #000000;
-    -fx-border-width: 3 ;
-    -fx-border-color:#2563eb;
-
+    -fx-background-color: #0f0f11;
+    -fx-control-inner-background: #0f0f11;
+    -fx-border-color: #2563eb;
+    -fx-border-width: 2;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-table-cell-border-color: #1f1f22;
+    -fx-padding: 6;
+}
+.custom-table .column-header-background{
+    -fx-background-color: linear-gradient(to bottom, #111827, #0b1220);
+    -fx-border-color: transparent transparent #1f2937 transparent;
+    -fx-padding: 8 6;
+    -fx-background-radius: 10 10 0 0;
+}
+.custom-table .column-header, .custom-table .filler{
+    -fx-background-color: transparent;
+}
+.custom-table .column-header .label{
+    -fx-text-fill: #e5e7eb;
+    -fx-font-weight: 600;
+}
+.custom-table .table-cell{
+    -fx-text-fill: #e5e7eb;
+    -fx-padding: 10 8;
+}
+.custom-table .table-row-cell{
+    -fx-background-color: #0f0f11;
+}
+.custom-table .table-row-cell:odd{
+    -fx-background-color: #0b1220;
+}
+.custom-table .table-row-cell:selected{
+    -fx-background-color: linear-gradient(to right, #1d4ed8, #7c3aed);
+    -fx-text-fill: #ffffff;
+}
+.custom-table .scroll-bar:horizontal .track,
+.custom-table .scroll-bar:vertical .track{
+    -fx-background-color: #0b1220;
+}
+.custom-table .scroll-bar:horizontal .thumb,
+.custom-table .scroll-bar:vertical .thumb{
+    -fx-background-color: #2563eb;
+    -fx-background-radius: 8;
 }
 
 /* suggestions list styling for dark mode */

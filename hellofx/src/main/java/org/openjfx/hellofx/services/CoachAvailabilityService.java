@@ -8,6 +8,7 @@ import java.util.List;
 import org.openjfx.hellofx.dao.CoachAvailabilityDAO;
 import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.model.AvailabilitySlot;
+import org.openjfx.hellofx.model.CoachAvailabilityRow;
 
 public class CoachAvailabilityService {
     private final CoachAvailabilityDAO availabilityDAO = DaoFactory.coachAvailability();
@@ -34,5 +35,13 @@ public class CoachAvailabilityService {
 
     public List<AvailabilitySlot> getAvailabilityForDate(Long coachId, LocalDate date) throws SQLException {
         return availabilityDAO.getAvailabilityForDate(coachId, date);
+    }
+
+    public List<CoachAvailabilityRow> listUpcomingForCoach(Long coachId) throws SQLException {
+        return availabilityDAO.listUpcomingForCoach(coachId);
+    }
+
+    public void deleteAvailability(Long coachId, Long availabilityId) throws SQLException {
+        availabilityDAO.deleteAvailability(coachId, availabilityId);
     }
 }

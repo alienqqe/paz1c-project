@@ -97,6 +97,7 @@
                      <Button fx:id="visitHistoryButton" mnemonicParsing="false" onAction="#onOpenVisitHistory" text="%membership.visitHistory" />
                      <Button fx:id="manageUsersButton" mnemonicParsing="false" onAction="#onManageUsers" text="%membership.manageUsers" />
                      <Button fx:id="availabilityButton" mnemonicParsing="false" onAction="#onAddAvailability" text="%membership.addAvailability" />
+                     <Button fx:id="manageAvailabilityButton" mnemonicParsing="false" onAction="#onManageAvailability" text="%membership.manageAvailability" />
                      <Button fx:id="coachProfileButton" mnemonicParsing="false" onAction="#onCoachProfile" text="%membership.profile" />
                      <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#onLogout" text="%membership.logout" />
                      <Button fx:id="discountButton" mnemonicParsing="false" onAction="#onDiscount" text="%membership.manageDiscounts" />

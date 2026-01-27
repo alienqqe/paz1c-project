@@ -6,6 +6,7 @@ import java.util.List;
 import org.openjfx.hellofx.dao.ClientDAO;
 import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.entities.Client;
+import org.openjfx.hellofx.model.ClientWithMembershipStatus;
 
 public class ClientService {
     private final ClientDAO clientDAO = DaoFactory.clients();
@@ -16,5 +17,9 @@ public class ClientService {
 
     public List<Client> searchClients(String query) throws SQLException {
         return clientDAO.searchClients(query);
+    }
+
+    public List<ClientWithMembershipStatus> searchClientsWithStatus(String query) throws SQLException {
+        return clientDAO.searchClientsWithStatus(query);
     }
 }

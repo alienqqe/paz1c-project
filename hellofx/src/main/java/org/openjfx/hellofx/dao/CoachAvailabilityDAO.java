@@ -8,12 +8,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.openjfx.hellofx.model.AvailabilitySlot;
+import org.openjfx.hellofx.model.CoachAvailabilityRow;
 import org.openjfx.hellofx.utils.Database;
 import org.springframework.jdbc.core.RowMapper;
 
 public class CoachAvailabilityDAO {
 
     private final RowMapper<AvailabilitySlot> mapper = (rs, rowNum) -> new AvailabilitySlot(
+        rs.getTimestamp("startDate").toLocalDateTime(),
+        rs.getTimestamp("endDate").toLocalDateTime(),
+        rs.getString("note")
+    );
+
+    private final RowMapper<CoachAvailabilityRow> rowMapperWithId = (rs, rowNum) -> new CoachAvailabilityRow(
+        rs.getLong("id"),
         rs.getTimestamp("startDate").toLocalDateTime(),
         rs.getTimestamp("endDate").toLocalDateTime(),
         rs.getString("note")
@@ -95,6 +103,29 @@ public class CoachAvailabilityDAO {
     public void deleteExpired() throws SQLException {
         String sql = "DELETE FROM coach_availability WHERE endDate < ?";
         Database.jdbc().update(sql, Timestamp.valueOf(LocalDateTime.now()));
+    }
+
+    public List<CoachAvailabilityRow> listUpcomingForCoach(Long coachId) throws SQLException {
+        String sql = """
+            SELECT id, startDate, endDate, COALESCE(note, 'Available') AS note
+            FROM coach_availability
+            WHERE coach_id = ?
+              AND endDate >= ?
+            ORDER BY startDate
+        """;
+        return Database.jdbc().query(
+            sql,
+            ps -> {
+                ps.setLong(1, coachId);
+                ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            },
+            rowMapperWithId
+        );
+    }
+
+    public int deleteAvailability(Long coachId, Long availabilityId) throws SQLException {
+        String sql = "DELETE FROM coach_availability WHERE id = ? AND coach_id = ?";
+        return Database.jdbc().update(sql, availabilityId, coachId);
     }
 
     // splits the avaliability slot after a booking
