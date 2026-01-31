@@ -15,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 
 public class RegisterController implements Initializable {
 
@@ -67,8 +68,17 @@ public class RegisterController implements Initializable {
         alert.setContentText(message);
         alert.showAndWait();
         if (statusLabel != null) {
+            statusLabel.getStyleClass().removeAll("status-success", "status-error");
+            if (type == Alert.AlertType.INFORMATION) {
+                statusLabel.getStyleClass().add("status-success");
+                statusLabel.setStyle("-fx-text-fill: #22c55e;");
+            } else {
+                statusLabel.getStyleClass().add("status-error");
+                statusLabel.setStyle("-fx-text-fill: #ef4444;");
+            }
             statusLabel.setText(message);
             statusLabel.setVisible(true);
+            statusLabel.setManaged(true);
         }
     }
 

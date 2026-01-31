@@ -40,9 +40,7 @@ public class ClientDAO {
         }, mapper);
     }
 
-    /**
-     * Returns clients matching query together with their active membership (if any) in one query.
-     */
+    
     public List<ClientWithMembershipStatus> searchClientsWithStatus(String query) throws SQLException {
         String pattern = "%" + query.toLowerCase() + "%";
         String sql = """
@@ -55,7 +53,7 @@ public class ClientDAO {
                 FROM memberships m
                 WHERE m.startDate <= ?
                   AND (m.expiresAt IS NULL OR m.expiresAt >= ?)
-                  AND (m.type <> 'Ten' OR m.visits_remaining IS NULL OR m.visits_remaining > 0)
+                  AND (m.type <> 'Ten' OR m.visits_remaining > 0)
             )
             SELECT c.id,
                    c.name,

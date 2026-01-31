@@ -17,6 +17,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 
 public class LoginController implements Initializable {
@@ -43,18 +44,23 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         this.resources = resources;
+        if (statusLabel != null) {
+            statusLabel.setText("");
+            statusLabel.setVisible(false);
+            statusLabel.setManaged(false);
+        }
         setupLanguageSelector();
         setupThemeSelector();
     }
 
     @FXML
     void onLogin(ActionEvent event) {
-        statusLabel.setText("");
+        clearStatus();
         String username = usernameField.getText().trim();
         String password = passwordField.getText();
 
         if (username.isEmpty() || password.isEmpty()) {
-            statusLabel.setText(get("login.error.fill"));
+            setStatus(get("login.error.fill"), false);
             return;
         }
 
@@ -63,15 +69,36 @@ public class LoginController implements Initializable {
             if (ok) {
                 App.setRoot("membership_view");
             } else {
-                statusLabel.setText(get("login.error.invalid"));
+                setStatus(get("login.error.invalid"), false);
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            statusLabel.setText(get("login.error.failed") + ": " + e.getMessage());
+            setStatus(get("login.error.failed") + ": " + e.getMessage(), false);
         } catch (IOException e) {
             e.printStackTrace();
-            statusLabel.setText(get("login.error.load"));
+            setStatus(get("login.error.load"), false);
         }
+    }
+
+    private void clearStatus() {
+        if (statusLabel == null) return;
+        statusLabel.setText("");
+        statusLabel.getStyleClass().removeAll("status-error", "status-success");
+        statusLabel.setStyle("");
+        statusLabel.setVisible(false);
+        statusLabel.setManaged(false);
+    }
+
+    private void setStatus(String text, boolean success) {
+        if (statusLabel == null) return;
+        statusLabel.getStyleClass().removeAll("status-error", "status-success");
+        statusLabel.getStyleClass().add(success ? "status-success" : "status-error");
+        statusLabel.setStyle(success
+            ? "-fx-text-fill: #22c55e;"
+            : "-fx-text-fill: #ef4444;");
+        statusLabel.setText(text);
+        statusLabel.setVisible(true);
+        statusLabel.setManaged(true);
     }
 
 

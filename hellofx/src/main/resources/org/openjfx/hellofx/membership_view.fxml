@@ -67,7 +67,7 @@
                   <Font name="System Bold" size="18.0" />
                </font>
             </Label>
-            <VBox fx:id="resultsBox" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" visible="false" VBox.vgrow="ALWAYS">
+            <VBox fx:id="resultsBox" alignment="CENTER" prefWidth="200.0" visible="false" VBox.vgrow="ALWAYS">
                <opaqueInsets>
                   <Insets />
                </opaqueInsets>

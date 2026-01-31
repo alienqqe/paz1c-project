@@ -40,8 +40,11 @@
     -fx-text-fill: #666666;
     -fx-font-size: 11px;
 }
-.status-error {
+.root-pane .status-error {
     -fx-text-fill: #c62828;
+}
+.root-pane .status-success {
+    -fx-text-fill: #2e7d32;
 }
 .text-field,
 .password-field {

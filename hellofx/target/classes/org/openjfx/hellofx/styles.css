@@ -49,8 +49,11 @@
     -fx-text-fill: #9ca3af;
     -fx-font-size: 11px;
 }
-.status-error {
-    -fx-text-fill: #fca5a5;
+.root-pane .status-error {
+    -fx-text-fill: #ef4444;
+}
+.root-pane .status-success {
+    -fx-text-fill: #22c55e;
 }
 
 .text-field,

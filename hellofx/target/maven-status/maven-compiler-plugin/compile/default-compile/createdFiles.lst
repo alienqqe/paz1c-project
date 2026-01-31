@@ -47,6 +47,7 @@ org\openjfx\hellofx\services\ClientService.class
 org\openjfx\hellofx\entities\Membership$MembershipType.class
 org\openjfx\hellofx\controllers\CoachAvailabilityListController$TableCellWithDelete.class
 org\openjfx\hellofx\controllers\DiscountRulesController.class
+org\openjfx\hellofx\controllers\MembershipController$2.class
 org\openjfx\hellofx\entities\Coach.class
 org\openjfx\hellofx\entities\User.class
 org\openjfx\hellofx\dao\TimetableDAO.class

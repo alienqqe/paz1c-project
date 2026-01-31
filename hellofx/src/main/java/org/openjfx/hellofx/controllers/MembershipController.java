@@ -19,6 +19,7 @@ import org.openjfx.hellofx.utils.AuthContext;
 import org.openjfx.hellofx.utils.AuthService;
 
 import javafx.collections.ListChangeListener;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -32,6 +33,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -114,6 +116,26 @@ public class MembershipController implements Initializable {
         if (resultsList != null) {
             resultsList.getItems().addListener((ListChangeListener<HBox>) change -> updateResultsVisibility());
             updateResultsVisibility();
+            resultsList.setPrefWidth(Double.MAX_VALUE);
+            resultsList.setMaxWidth(Double.MAX_VALUE);
+            // Make rows grow vertically with content size and cap height to avoid huge lists.
+            resultsList.setFixedCellSize(56);
+            resultsList.prefHeightProperty().bind(
+                Bindings.min(400, Bindings.size(resultsList.getItems()).multiply(resultsList.getFixedCellSize()).add(12))
+            );
+            resultsList.setCellFactory(lv -> {
+                ListCell<HBox> cell = new ListCell<>() {
+                    @Override
+                    protected void updateItem(HBox item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setText(null);
+                        setGraphic(empty ? null : item);
+                    }
+                };
+                cell.setPrefWidth(0);
+                cell.setMaxWidth(Double.MAX_VALUE);
+                return cell;
+            });
         }
         if (manageUsersButton != null) {
             manageUsersButton.setDisable(!AuthContext.isAdmin());
@@ -342,10 +364,16 @@ public class MembershipController implements Initializable {
 
         boolean isAdmin = AuthContext.isAdmin();
         Label nameAndPhoneLabel = new Label(client.email() + " (" + client.name() + "," + client.phoneNumber() + ") - " + get("membership.label") + ": " + membershipLabelText);
+        nameAndPhoneLabel.setWrapText(true);
+        nameAndPhoneLabel.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(nameAndPhoneLabel, javafx.scene.layout.Priority.ALWAYS);
+
         Button assignButton = new Button(get("membership.assign"));
+        assignButton.setPrefWidth(90);
         assignButton.setOnAction(e -> openAssignMembershipWindow(new Client(client.id(), client.name(), client.email(), client.phoneNumber())));
 
         Button deleteBtn = new Button(get("membership.delete"));
+        deleteBtn.setPrefWidth(90);
         boolean hasMembership = currentType != null;
         deleteBtn.setDisable(!isAdmin || !hasMembership);
         deleteBtn.setOnAction(e -> {
@@ -371,6 +399,7 @@ public class MembershipController implements Initializable {
         });
 
         Button checkInButton = new Button(get("membership.checkin"));
+        checkInButton.setPrefWidth(90);
         boolean isTenMembership = "Ten".equalsIgnoreCase(currentType);
         boolean tenExhausted = isTenMembership && remainingVisits != null && remainingVisits <= 0;
         boolean hasActiveMembership = currentType != null;
@@ -391,7 +420,13 @@ public class MembershipController implements Initializable {
             }
         });
 
-        HBox row = new HBox(10);
+        HBox row = new HBox(12);
+        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        row.setFillHeight(true);
+        // Stretch row to list width to avoid horizontal scrollbars.
+        if (resultsList != null) {
+            row.prefWidthProperty().bind(resultsList.widthProperty().subtract(20));
+        }
         row.getChildren().addAll(nameAndPhoneLabel, assignButton, deleteBtn, checkInButton);
         return row;
     }
