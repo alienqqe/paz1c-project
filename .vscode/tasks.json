@@ -1,0 +1,34 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Maven: Test with Coverage (hellofx)",
+            "type": "shell",
+            "command": "mvn -Pcoverage test",
+            "options": {
+                "cwd": "${workspaceFolder}/hellofx"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Open JaCoCo Report",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "start",
+                "\"\"",
+                "${workspaceFolder}\\hellofx\\target\\site\\jacoco\\index.html"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "Coverage: Maven + Open Report",
+            "dependsOn": [
+                "Maven: Test with Coverage (hellofx)",
+                "Open JaCoCo Report"
+            ],
+            "dependsOrder": "sequence"
+        }
+    ]
+}

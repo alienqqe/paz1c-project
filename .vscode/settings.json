@@ -1,3 +1,19 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.test.defaultConfig": "hellofx",
+    "java.test.config": [
+        {
+            "name": "hellofx",
+            "workingDirectory": "${workspaceFolder}/hellofx",
+            "vmArgs": [
+                "-Dnet.bytebuddy.experimental=true",
+                "-XX:+EnableDynamicAgentLoading",
+                "--add-opens=hellofx/org.openjfx.hellofx=ALL-UNNAMED",
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-opens=java.base/java.util=ALL-UNNAMED",
+                "--add-opens=java.sql/java.sql=ALL-UNNAMED"
+            ]
+        }
+    ]
 }

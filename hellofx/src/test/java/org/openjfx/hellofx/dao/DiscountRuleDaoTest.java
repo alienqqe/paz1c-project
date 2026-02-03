@@ -1,12 +1,14 @@
 package org.openjfx.hellofx.dao;
 
-import org.junit.jupiter.api.Test;
-import org.openjfx.hellofx.entities.DiscountRule;
-
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.openjfx.hellofx.TestContainers;
+import org.openjfx.hellofx.entities.DiscountRule;
 
 class DiscountRuleDaoTest extends TestContainers {
 
@@ -28,5 +30,21 @@ class DiscountRuleDaoTest extends TestContainers {
         Optional<DiscountRule> best = dao.bestRuleForVisits(9);
         assertTrue(best.isPresent());
         assertEquals(10, best.get().discountPercent());
+    }
+
+    @Test
+    void bestRuleForVisitsEmptyWhenNoRuleMatches() {
+        dao.replaceAll(List.of(new DiscountRule(0L, 5, 10)));
+
+        assertTrue(dao.bestRuleForVisits(0).isEmpty());
+    }
+
+    @Test
+    void replaceAllWithEmptyClearsTable() {
+        dao.replaceAll(List.of(new DiscountRule(0L, 5, 10)));
+        assertFalse(dao.findAllOrdered().isEmpty());
+
+        dao.replaceAll(List.of());
+        assertTrue(dao.findAllOrdered().isEmpty());
     }
 }

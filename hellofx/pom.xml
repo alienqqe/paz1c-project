@@ -10,6 +10,9 @@
         <javafx.version>21</javafx.version>
         <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
         <junit.jupiter.version>5.10.0</junit.jupiter.version>
+        <testcontainers.version>1.21.3</testcontainers.version>
+        <jacoco.version>0.8.14</jacoco.version>
+        <jacocoArgLine></jacocoArgLine>
     </properties>
     <dependencies>
         <dependency>
@@ -47,13 +50,13 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>mysql</artifactId>
-      <version>1.19.1</version>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>1.19.1</version>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -118,7 +121,7 @@
         <version>3.1.2</version>
         <configuration>
           <useModulePath>false</useModulePath>
-          <argLine>
+          <argLine>@{jacocoArgLine}
             --add-opens java.base/java.lang=ALL-UNNAMED
             --add-opens java.base/java.util=ALL-UNNAMED
             --add-opens java.sql/java.sql=ALL-UNNAMED
@@ -130,4 +133,43 @@
 
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.version}</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/org/openjfx/hellofx/controllers/**</exclude>
+                                <exclude>**/org/openjfx/hellofx/App*</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                                <configuration>
+                                    <propertyName>jacocoArgLine</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

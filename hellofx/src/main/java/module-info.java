@@ -12,9 +12,9 @@ module hellofx {
     requires com.zaxxer.hikari;
     opens org.openjfx.hellofx to javafx.fxml;
     opens org.openjfx.hellofx.entities to javafx.base;
-    opens org.openjfx.hellofx.dao to spring.core, spring.beans;
+    opens org.openjfx.hellofx.dao;
 
     opens org.openjfx.hellofx.controllers to javafx.fxml, javafx.base;
-    opens org.openjfx.hellofx.utils to javafx.fxml;
+    opens org.openjfx.hellofx.utils;
     exports org.openjfx.hellofx;
 }

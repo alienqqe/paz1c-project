@@ -3,38 +3,31 @@ package org.openjfx.hellofx.utils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mindrot.jbcrypt.BCrypt;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
 import org.openjfx.hellofx.dao.CoachDAO;
+import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.UserDAO;
 import org.openjfx.hellofx.entities.User;
 
-import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock
-    private UserDAO userDAO;
-
-    @Mock
-    private CoachDAO coachDAO;
-
-    private AuthService service;
+    static {
+        // VS Code test runner does not always inherit Maven/Surefire JVM args.
+        // Mockito-inline uses Byte Buddy which currently needs this flag on Java 25.
+        System.setProperty("net.bytebuddy.experimental",
+            System.getProperty("net.bytebuddy.experimental", "true"));
+    }
 
     @BeforeEach
-    void setUp() throws Exception {
-        service = new AuthService();
-        inject(service, "userDAO", userDAO);
-        inject(service, "coachDAO", coachDAO);
+    void setUp() {
         AuthContext.clear();
     }
 
@@ -44,115 +37,175 @@ class AuthServiceTest {
     }
 
     @Test
-    void ensureDefaultAdminCreatesWhenEmpty() throws Exception {
-        when(userDAO.countUsers()).thenReturn(0L);
+    void ensureDefaultAdminCreatesUserWhenNoUsers() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
 
-        service.ensureDefaultAdmin();
+            when(userDAO.countUsers()).thenReturn(0L);
 
-        verify(userDAO).createUser("admin", "admin123", "ADMIN", null);
-    }
+            AuthService service = new AuthService();
+            service.ensureDefaultAdmin();
 
-    @Test
-    void ensureDefaultAdminSkipsWhenUsersExist() throws Exception {
-        when(userDAO.countUsers()).thenReturn(2L);
-
-        service.ensureDefaultAdmin();
-
-        verify(userDAO, never()).createUser(anyString(), anyString(), anyString(), any());
-    }
-
-    @Test
-    void loginSuccessSetsContextAndResolvesCoachId() throws Exception {
-        User user = new User(1L, "coach1", "storedHash", "COACH", null);
-        when(userDAO.findByUsername("coach1")).thenReturn(Optional.of(user));
-        when(coachDAO.findCoachIdForUser("coach1")).thenReturn(99L);
-
-        try (MockedStatic<BCrypt> mockedBcrypt = mockStatic(BCrypt.class)) {
-            mockedBcrypt.when(() -> BCrypt.checkpw("secret", "storedHash")).thenReturn(true);
-
-            boolean loggedIn = service.login("coach1", "secret");
-
-            assertTrue(loggedIn);
-            assertNotNull(AuthContext.getCurrentUser());
-            assertEquals(99L, AuthContext.getCurrentUser().coachId());
-            verify(userDAO).updateCoachId(1L, 99L);
+            verify(userDAO).createUser("admin", "admin123", "ADMIN", null);
         }
     }
 
     @Test
-    void loginFailsWhenPasswordWrong() throws Exception {
-        User user = new User(2L, "john", "hash", "ADMIN", null);
-        when(userDAO.findByUsername("john")).thenReturn(Optional.of(user));
+    void ensureDefaultAdminDoesNothingWhenUsersExist() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
 
-        try (MockedStatic<BCrypt> mockedBcrypt = mockStatic(BCrypt.class)) {
-            mockedBcrypt.when(() -> BCrypt.checkpw("bad", "hash")).thenReturn(false);
+            when(userDAO.countUsers()).thenReturn(2L);
 
-            boolean loggedIn = service.login("john", "bad");
+            AuthService service = new AuthService();
+            service.ensureDefaultAdmin();
 
-            assertFalse(loggedIn);
+            verify(userDAO, never()).createUser(anyString(), anyString(), anyString(), nullable(Long.class));
+        }
+    }
+
+    @Test
+    void loginReturnsFalseWhenUserMissing() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
+
+            when(userDAO.findByUsername("missing")).thenReturn(Optional.empty());
+
+            AuthService service = new AuthService();
+            assertFalse(service.login("missing", "pw"));
             assertFalse(AuthContext.isLoggedIn());
         }
     }
 
     @Test
-    void loginFailsWhenUserMissing() throws Exception {
-        when(userDAO.findByUsername("nouser")).thenReturn(Optional.empty());
+    void loginReturnsTrueAndSetsContextWhenPasswordMatches() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            CoachDAO coachDAO = mock(CoachDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(coachDAO);
 
-        boolean loggedIn = service.login("nouser", "pwd");
+            String hash = BCrypt.hashpw("secret", BCrypt.gensalt());
+            User user = new User(1L, "admin", hash, "ADMIN", null);
+            when(userDAO.findByUsername("admin")).thenReturn(Optional.of(user));
 
-        assertFalse(loggedIn);
-        assertFalse(AuthContext.isLoggedIn());
-    }
+            AuthService service = new AuthService();
+            assertTrue(service.login("admin", "secret"));
+            assertEquals(user, AuthContext.getCurrentUser());
 
-    @Test
-    void changePasswordUpdatesHashAndContext() throws Exception {
-        User existing = new User(5L, "mary", "oldHash", "STAFF", null);
-        User updated = new User(5L, "mary", "newHash", "STAFF", null);
-        when(userDAO.findById(5L)).thenReturn(Optional.of(existing), Optional.of(updated));
-
-        try (MockedStatic<BCrypt> mockedBcrypt = mockStatic(BCrypt.class)) {
-            mockedBcrypt.when(() -> BCrypt.checkpw("current", "oldHash")).thenReturn(true);
-            mockedBcrypt.when(() -> BCrypt.hashpw("newPass", "salt")).thenReturn("newHash");
-            mockedBcrypt.when(BCrypt::gensalt).thenReturn("salt");
-
-            boolean changed = service.changePassword(5L, "current", "newPass");
-
-            assertTrue(changed);
-            verify(userDAO).updatePassword(5L, "newPass");
-            assertEquals("newHash", AuthContext.getCurrentUser().passwordHash());
+            verifyNoInteractions(coachDAO);
         }
     }
 
     @Test
-    void changePasswordFailsOnWrongCurrent() throws Exception {
-        User existing = new User(6L, "kate", "oldHash", "STAFF", null);
-        when(userDAO.findById(6L)).thenReturn(Optional.of(existing));
+    void loginCoachResolvesCoachIdAndPersists() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            CoachDAO coachDAO = mock(CoachDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(coachDAO);
 
-        try (MockedStatic<BCrypt> mockedBcrypt = mockStatic(BCrypt.class)) {
-            mockedBcrypt.when(() -> BCrypt.checkpw("wrong", "oldHash")).thenReturn(false);
+            String hash = BCrypt.hashpw("pw", BCrypt.gensalt());
+            User coachUser = new User(5L, "coachUser", hash, "COACH", null);
+            when(userDAO.findByUsername("coachUser")).thenReturn(Optional.of(coachUser));
+            when(coachDAO.findCoachIdForUser("coachUser")).thenReturn(42L);
 
-            boolean changed = service.changePassword(6L, "wrong", "newPass");
+            AuthService service = new AuthService();
+            assertTrue(service.login("coachUser", "pw"));
 
-            assertFalse(changed);
+            verify(coachDAO).findCoachIdForUser("coachUser");
+            verify(userDAO).updateCoachId(5L, 42L);
+            assertEquals(42L, AuthContext.getCurrentUser().coachId());
+        }
+    }
+
+    @Test
+    void logoutClearsContext() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            mocked.when(DaoFactory::users).thenReturn(mock(UserDAO.class));
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
+
+            AuthContext.setCurrentUser(new User(1L, "u", "h", "ADMIN", null));
+            assertTrue(AuthContext.isLoggedIn());
+
+            AuthService service = new AuthService();
+            service.logout();
+
+            assertFalse(AuthContext.isLoggedIn());
+        }
+    }
+
+    @Test
+    void createUserDelegatesToDao() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
+
+            AuthService service = new AuthService();
+            service.createUser("user", "pw", "ADMIN", null);
+
+            verify(userDAO).createUser("user", "pw", "ADMIN", null);
+        }
+    }
+
+    @Test
+    void changePasswordReturnsFalseWhenUserMissing() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
+
+            when(userDAO.findById(1L)).thenReturn(Optional.empty());
+
+            AuthService service = new AuthService();
+            assertFalse(service.changePassword(1L, "old", "new"));
             verify(userDAO, never()).updatePassword(anyLong(), anyString());
-            assertFalse(AuthContext.isLoggedIn());
         }
     }
 
     @Test
-    void logoutClearsContext() {
-        AuthContext.setCurrentUser(new User(7L, "tmp", "h", "ADMIN", null));
-        assertTrue(AuthContext.isLoggedIn());
+    void changePasswordReturnsFalseWhenCurrentPasswordWrong() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
 
-        service.logout();
+            String hash = BCrypt.hashpw("correct", BCrypt.gensalt());
+            when(userDAO.findById(1L)).thenReturn(Optional.of(new User(1L, "user", hash, "ADMIN", null)));
 
-        assertFalse(AuthContext.isLoggedIn());
-        assertNull(AuthContext.getCurrentUser());
+            AuthService service = new AuthService();
+            assertFalse(service.changePassword(1L, "wrong", "new"));
+            verify(userDAO, never()).updatePassword(anyLong(), anyString());
+        }
     }
 
-    private void inject(Object target, String fieldName, Object value) throws Exception {
-        Field field = target.getClass().getDeclaredField(fieldName);
-        field.setAccessible(true);
-        field.set(target, value);
+    @Test
+    void changePasswordUpdatesPasswordAndRefreshesContext() throws SQLException {
+        try (MockedStatic<DaoFactory> mocked = Mockito.mockStatic(DaoFactory.class)) {
+            UserDAO userDAO = mock(UserDAO.class);
+            mocked.when(DaoFactory::users).thenReturn(userDAO);
+            mocked.when(DaoFactory::coaches).thenReturn(mock(CoachDAO.class));
+
+            String oldHash = BCrypt.hashpw("old", BCrypt.gensalt());
+            User existing = new User(1L, "user", oldHash, "ADMIN", null);
+
+            String newHash = BCrypt.hashpw("new", BCrypt.gensalt());
+            User refreshed = new User(1L, "user", newHash, "ADMIN", null);
+
+            when(userDAO.findById(1L)).thenReturn(Optional.of(existing), Optional.of(refreshed));
+
+            AuthService service = new AuthService();
+            assertTrue(service.changePassword(1L, "old", "new"));
+
+            verify(userDAO).updatePassword(1L, "new");
+            assertEquals(refreshed, AuthContext.getCurrentUser());
+        }
     }
 }

@@ -1,6 +1,5 @@
 package org.openjfx.hellofx.utils;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -14,22 +13,26 @@ import com.zaxxer.hikari.HikariDataSource;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Database {
-    private static final Dotenv dotenv = Dotenv.load();
+    private static final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
     private static final String PORT =
-        (dotenv.get("DB_PORT") == null || dotenv.get("DB_PORT").isBlank())
-            ? "3306"
-            : dotenv.get("DB_PORT");
+        firstNonBlank(System.getProperty("DB_PORT"), dotenv.get("DB_PORT"), "3306");
 
-    private static final String URL =
+    private static final String DEFAULT_URL =
         "jdbc:mysql://127.0.0.1:" + PORT + "/gym_db?allowPublicKeyRetrieval=true&useSSL=false";
 
-    private static final String USER = dotenv.get("DB_USER");
-    private static final String PASSWORD = dotenv.get("DB_PASSWORD");
+    private static final String URL =
+        firstNonBlank(System.getProperty("DB_JDBC"), DEFAULT_URL);
+
+    private static final String USER =
+        firstNonBlank(System.getProperty("DB_USER"), dotenv.get("DB_USER"));
+
+    private static final String PASSWORD =
+        firstNonBlank(System.getProperty("DB_PASSWORD"), dotenv.get("DB_PASSWORD"));
 
     // we use hikari data source, because it is faster, and manages the pooling.
-    private static final HikariDataSource dataSource;
-    private static final JdbcTemplate jdbcTemplate;
+    private static HikariDataSource dataSource;
+    private static JdbcTemplate jdbcTemplate;
 
     static {
         HikariConfig cfg = new HikariConfig();
@@ -70,16 +73,18 @@ public class Database {
         cfg.setMaximumPoolSize(5);
         cfg.setPoolName("gym_db_pool_test");
         HikariDataSource testDs = new HikariDataSource(cfg);
-        try {
-            Field dsField = Database.class.getDeclaredField("dataSource");
-            dsField.setAccessible(true);
-            dsField.set(null, testDs);
+        dataSource = testDs;
+        jdbcTemplate = new JdbcTemplate(testDs);
+    }
 
-            Field jtField = Database.class.getDeclaredField("jdbcTemplate");
-            jtField.setAccessible(true);
-            jtField.set(null, new JdbcTemplate(testDs));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            throw new IllegalStateException("Failed to override datasource for tests", e);
+    private static String firstNonBlank(String value, String fallback) {
+        if (value != null && !value.isBlank()) {
+            return value.trim();
         }
+        return fallback;
+    }
+
+    private static String firstNonBlank(String first, String second, String fallback) {
+        return firstNonBlank(first, firstNonBlank(second, fallback));
     }
 }
