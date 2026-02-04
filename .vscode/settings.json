@@ -15,5 +15,6 @@
                 "--add-opens=java.sql/java.sql=ALL-UNNAMED"
             ]
         }
-    ]
+    ],
+    "java.debug.settings.onBuildFailureProceed": true
 }

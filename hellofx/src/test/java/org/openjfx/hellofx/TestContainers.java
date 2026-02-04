@@ -16,10 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.openjfx.hellofx.utils.Database;
 import org.testcontainers.containers.MySQLContainer;
 
-/**
- * Base class for DAO integration tests.
- * Starts a MySQL Testcontainer once and cleans/seeds tables before each test.
- */
+
 public abstract class TestContainers {
 
     private static MySQLContainer<?> mysql;
@@ -32,21 +29,17 @@ public abstract class TestContainers {
             }
 
             try {
-                // Docker Desktop may reject older/unknown API versions (HTTP 400). Force the current server API version.
                 configureDockerApiVersion();
 
                 mysql = new MySQLContainer<>("mysql:8.4.2")
                     .withDatabaseName("gymtest_db");
                 mysql.start();
                 applyInitSql(mysql);
-
-                // Match the PAZ exercises style: tests set connection parameters as system properties.
                 System.setProperty("DB_JDBC", mysql.getJdbcUrl());
                 System.setProperty("DB_USER", mysql.getUsername());
                 System.setProperty("DB_PASSWORD", mysql.getPassword());
                 Database.overrideDataSourceForTests(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
             } catch (Exception ex) {
-                // If Docker is unavailable, skip integration tests instead of failing the build.
                 Assumptions.assumeTrue(false, "Skipping DAO integration tests: " + ex.getMessage());
             }
         }
@@ -75,7 +68,6 @@ public abstract class TestContainers {
                 return new String(in.readAllBytes(), StandardCharsets.UTF_8);
             }
         } catch (Exception ignored) {
-            // Fall back to a direct file lookup.
         }
 
         Path cwd = Paths.get(System.getProperty("user.dir", "."));
@@ -124,17 +116,12 @@ public abstract class TestContainers {
                 System.setProperty("api.version", apiVersion);
             }
         } catch (Exception ignored) {
-            // Best-effort: if Docker is unavailable, the container start will fail and tests will report it.
         }
     }
 
-    /**
-     * Clears all tables to give each test a clean slate.
-     */
     protected void clearTables() {
         var jdbc = Database.jdbc();
 
-        // Delete in FK-safe order (no need to disable foreign_key_checks).
         jdbc.update("DELETE FROM visits");
         jdbc.update("DELETE FROM training_sessions");
         jdbc.update("DELETE FROM coach_specializations");
@@ -151,7 +138,6 @@ public abstract class TestContainers {
     void setUpBase() {
         clearTables();
 
-        // Minimal seed to make tests shorter (similar to PAZ exercises).
         var jdbc = Database.jdbc();
         jdbc.update("INSERT INTO clients (id, name, email, phone_number, last_discount_threshold_used) VALUES (1, 'Seed Client 1', 'seed.client1@test.com', '111', 0)");
         jdbc.update("INSERT INTO clients (id, name, email, phone_number, last_discount_threshold_used) VALUES (2, 'Seed Client 2', 'seed.client2@test.com', '222', 0)");

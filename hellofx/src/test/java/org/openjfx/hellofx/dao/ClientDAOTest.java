@@ -51,7 +51,6 @@ class ClientDAOTest extends TestContainers {
         dao.addClient(new Client(null, "Zoe", "zoe@example.org", "001"));
         Long zoeId = dao.searchClients("zoe@example.org").get(0).id();
 
-        // Ten membership should expose remaining visits.
         membershipDao.addMembership(new Membership(
             null,
             LocalDate.now().minusDays(1),

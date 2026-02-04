@@ -75,8 +75,6 @@ class CoachAvailabilityDaoTest extends TestContainers {
         Long firstId = upcoming.get(0).id();
         assertEquals(1, dao.deleteAvailability(coachId, firstId));
         assertEquals(1, dao.listUpcomingForCoach(coachId).size());
-
-        // wrong coach id must not delete anything
         Long remainingId = dao.listUpcomingForCoach(coachId).get(0).id();
         assertEquals(0, dao.deleteAvailability(coachId + 999, remainingId));
     }

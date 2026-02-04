@@ -15,6 +15,7 @@ module hellofx {
     opens org.openjfx.hellofx.dao;
 
     opens org.openjfx.hellofx.controllers to javafx.fxml, javafx.base;
+    opens org.openjfx.hellofx.services;
     opens org.openjfx.hellofx.utils;
     exports org.openjfx.hellofx;
 }

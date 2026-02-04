@@ -54,7 +54,6 @@ class SpecializationDaoTest extends TestContainers {
         assertEquals(1, replaced.size());
         assertTrue(replaced.stream().anyMatch(s -> "Yoga".equals(s.name())));
 
-        // clearing should remove all rows for the coach
         dao.setSpecializationsForCoach(coachId, Set.of());
         assertTrue(dao.getSpecializationsForCoach(coachId).isEmpty());
     }

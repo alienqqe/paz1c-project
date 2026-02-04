@@ -1,27 +1,34 @@
 package org.openjfx.hellofx.utils;
 
+import java.sql.SQLException;
+import java.util.Optional;
+
 import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mindrot.jbcrypt.BCrypt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import org.openjfx.hellofx.dao.CoachDAO;
 import org.openjfx.hellofx.dao.DaoFactory;
 import org.openjfx.hellofx.dao.UserDAO;
 import org.openjfx.hellofx.entities.User;
 
-import java.sql.SQLException;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 class AuthServiceTest {
 
     static {
-        // VS Code test runner does not always inherit Maven/Surefire JVM args.
-        // Mockito-inline uses Byte Buddy which currently needs this flag on Java 25.
+   
         System.setProperty("net.bytebuddy.experimental",
             System.getProperty("net.bytebuddy.experimental", "true"));
     }
